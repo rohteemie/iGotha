@@ -1,0 +1,25 @@
+{
+  "name": "igothcha",
+  "version": "1.0.0",
+  "description": "This  is a social app for in-organisation that may be used as a temporary means of exchanging information among staffs at Autemus incorporation",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rohteemie/iGotha.git"
+  },
+  "author": "Rotimi Owolabi and Ajiboye Adeleye",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rohteemie/iGotha/issues"
+  },
+  "homepage": "https://github.com/rohteemie/iGotha#readme",
+  "dependencies": {
+    "express": "^4.19.2",
+    "mysql2": "^3.10.2",
+    "sequelize": "^6.37.3",
+    "sequelize-cli": "^6.6.2"
+  }
+}
