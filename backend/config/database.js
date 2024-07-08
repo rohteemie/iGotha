@@ -6,12 +6,12 @@ const { Sequelize } = require('sequelize');
 // Database configuration using environment variables
 const sequelize = new Sequelize(
   process.env.DB,
-  process.env.USER,
-  process.env.PASSWORD,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
   {
-    host: process.env.HOST,
-    dialect: process.env.DIALECT,
-    logging: false,
+    host: process.env.DB_HOST,
+    dialect: 'mysql',
+    logging: false
   }
 );
 
