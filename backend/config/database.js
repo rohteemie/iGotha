@@ -1,6 +1,6 @@
-require('dotenv').config();
+require("dotenv").config();
 
-const { Sequelize } = require('sequelize');
+const { Sequelize } = require("sequelize");
 
 // Database configuration using environment variables
 /**
@@ -14,8 +14,8 @@ const sequelize = new Sequelize(
   {
     host: process.env.DB_HOST,
     dialect: process.env.DB_DIALECT,
-    logging: process.env.DB_LOGGING === 'true' ? console.log : false
-  }
+    logging: process.env.DB_LOGGING === "true" ? console.log : false,
+  },
 );
 
 module.exports = sequelize;

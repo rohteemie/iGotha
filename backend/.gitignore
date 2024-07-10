@@ -30,3 +30,4 @@ backend/app.js
 backend/.gitignore
 app.js
 .gitignore
+.env.test
