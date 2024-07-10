@@ -31,3 +31,4 @@ backend/.gitignore
 app.js
 .gitignore
 .env.test
+../.trunk/
