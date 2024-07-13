@@ -26,9 +26,5 @@ Thumbs.db
 *.log
 logs
 
-backend/app.js
-backend/.gitignore
-app.js
-.gitignore
-.env.test
+# sytem log files
 ../.trunk/
