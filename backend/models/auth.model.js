@@ -13,10 +13,6 @@ const { DataTypes } = require('sequelize');
  * @property {Time} account_locked_time - The time when the Auth's account was locked.
  */
 
-/**
- * The Auth model.
- * @type {import('sequelize').ModelCtor<Auth>}
- */
 const Auth = storage.define(
   'Auth',
   {
@@ -47,11 +43,6 @@ const Auth = storage.define(
     },
     account_locked_date: {
       type: DataTypes.DATE,
-      allowNull: true,
-      defaultValue: null,
-    },
-    account_locked_time: {
-      type: DataTypes.TIME,
       allowNull: true,
       defaultValue: null,
     },
