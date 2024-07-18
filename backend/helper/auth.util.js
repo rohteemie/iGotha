@@ -1,3 +1,6 @@
+const { storage } = require('../config/database');
+const { Auth } = require('../models/auth.model');
+const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
@@ -77,10 +80,55 @@ function verifyToken(token) {
 }
 
 
+/**
+ * Resets the login count and unlocks the account for users whose account lock duration has expired.
+ * @async
+ * @function reset_login_count
+ * @throws {Error} If an error occurs while resetting the login count.
+ * @returns {Promise<void>} A promise that resolves when the login count is reset successfully.
+ */
+const reset_login_count = async function () {
+  try {
+    await storage.sync();
+
+    const now = new Date();
+
+    // Find all users with locked accounts
+    const lockedUsers = await Auth.findAll({
+      where: {
+        account_locked: true,
+        account_locked_date: { [Op.ne]: null }
+      }
+    });
+
+    for (const user of lockedUsers) {
+      const lockedTime = new Date(user.account_locked_time);
+      const timeDifference = (now - lockedTime) / 1000 / 60;
+
+      if (timeDifference > 10) {
+        await Auth.update({
+          failed_login_count: 0,
+          account_locked: false,
+          account_locked_date: null,
+          account_locked_time: null,
+        }, {
+          where: {
+            id: user.id,
+          },
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error resetting login count:', error);
+  }
+};
+
+
 module.exports = {
   hashPassword,
   generateJWT,
   comparePassword,
   verifyToken,
   //refreshToken
+  reset_login_count
 };
