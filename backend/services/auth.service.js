@@ -1,50 +1,19 @@
 const { storage } = require('../config/database');
 const { Auth } = require('../models/auth.model');
-const { hashPassword, comparePassword, generateJWT } = require('../helper/auth.util');
-const { Op } = require('sequelize');
+const {
+   hashPassword,
+   comparePassword,
+   generateJWT,
+   reset_login_count
+  } = require('../helper/auth.util');
+const schedule = require('node-schedule');
+
 
 /**
- * Resets the login count and unlocks the account for users whose account lock duration has expired.
- * @async
- * @function reset_login_count
- * @throws {Error} If an error occurs while resetting the login count.
- * @returns {Promise<void>} A promise that resolves when the login count is reset successfully.
+ * Schedule reset_login_count to run periodically every minutes.
+ * This ensures locked accounts are unlocked after the lock duration.
  */
-const reset_login_count = async function () {
-  try {
-    await storage.sync();
-
-    const now = new Date();
-
-    const lockedUsers = await Auth.findAll({
-      where: {
-        account_locked: true,
-        account_locked_time: { [Op.ne]: null }
-      }
-    });
-
-    for (const user of lockedUsers) {
-      const lockedTime = new Date(user.account_locked_time);
-      const timeDifference = (now - lockedTime) / 1000 / 60;
-
-      if (timeDifference > 10) {
-        await Auth.update({
-          failed_login_count: 0,
-          account_locked: false,
-          account_locked_date: null,
-          account_locked_time: null,
-        }, {
-          where: {
-            id: user.id,
-          },
-        });
-      }
-    }
-  } catch (error) {
-    console.error('Error resetting login count:', error);
-  }
-};
-reset_login_count();
+const unlockJob = schedule.scheduleJob('* * * * *', reset_login_count);
 
 
 /**
@@ -60,11 +29,13 @@ async function login(email, password) {
     const user = await Auth.findOne({ where: { email } });
 
     if (!user) {
-      return { message: 'Invalid email' };
+      console.log({ message: 'Invalid email, None registerd user!'})
+      return { message: 'Invalid email', status: 401 };
     }
 
     if (user.failed_login_count >= 5) {
-      return { message: 'Account is locked, try again later!' };
+      console.log({ message: 'Account is locked, try again later!' })
+      return { message: 'Account is locked, try again later!', status: 403 };
     }
 
     const passwordMatches = await comparePassword(password, user.password);
@@ -80,21 +51,26 @@ async function login(email, password) {
       await user.save();
 
       if (user.account_locked) {
-        return { message: 'Account is locked, wait for 24hrs' };
+        console.log({message: 'Account is locked, wait for 24hrs'})
+        return { message: 'Account is locked, wait for 24hrs', status: 403 };
       }
 
-      return { message: 'Invalid password' };
+      console.log({ message: 'Invalid password' })
+      return { message: 'Invalid password', status: 401 };
     }
 
     if (user.account_locked) {
-      return { message: 'Account is locked, try again in 24hrs' };
+      console.log({ message: 'Account is locked, try again in 24hrs' })
+      return { message: 'Account is locked, try again in 24hrs', status: 401 };
     }
 
     const token = generateJWT(user.id);
-    return { token };
+    console.log({token})
+    return { token, status: 200 };
 
   } catch (error) {
-    return { message: 'Internal server error' };
+    console.error('Error during login:', error);
+    return { message: 'Internal server error', status: 500 };
   }
 }
 
@@ -107,19 +83,20 @@ async function login(email, password) {
 async function register(email, password) {
   try {
     await storage.sync();
+
     const existingUser = await Auth.findOne({ where: { email } });
 
     if (existingUser) {
-      return { message: 'User already exists' };
+      return { message: 'User already exists', status: 400 };
     }
 
     const hashedPassword = await hashPassword(password);
     await Auth.create({ email, password: hashedPassword });
 
-    return { message: 'User created successfully' };
-
+    return { message: 'User created successfully', status: 201 };
   } catch (error) {
-    return { message: 'Internal server error' };
+    console.error('Error creating user:', error);
+    return { message: 'Internal server error', status: 500 };
   }
 }
 
