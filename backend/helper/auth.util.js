@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-require('dotenv').config({ path: '../.env' });
+require('dotenv').config();
 
 
 /**
@@ -27,15 +27,12 @@ async function hashPassword(password) {
  * @param {string} userPassword - The user's password to compare.
  * @returns {boolean} - Returns true if the passwords match, false otherwise.
  */
-function secureCompare(hashedPassword, userPassword) {
-  if (hashedPassword.length !== userPassword.length) {
-    return false;
+async function comparePassword(plainPassword, hashedPassword) {
+  try {
+    return await bcrypt.compare(plainPassword, hashedPassword);
+  } catch (err) {
+    throw new Error('Error comparing passwords:', err);
   }
-  let result = 0;
-  for (let i = 0; i < hashedPassword.length; i++) {
-    result |= hashedPassword.charCodeAt(i) ^ userPassword.charCodeAt(i);
-  }
-  return result === 0;
 }
 
 
@@ -55,7 +52,7 @@ function generateJWT(userId) {
     return jwt.sign({ userId }, secretKey, { expiresIn });
   } catch (error) {
     console.error('Error generating JWT:', error);
-    throw error; // Re-throw to be caught in calling function
+    throw error;
   }
 }
 
@@ -66,16 +63,16 @@ function generateJWT(userId) {
  * @param {string} token - The JWT to be verified.
  * @param {object} res - The response object for error handling.
  */
-function verifyToken(token, res) { // Pass res object for error handling
+function verifyToken(token) {
   try {
     const secretKey = process.env.JWT_SECRET;
     const decoded = jwt.verify(token, secretKey);
 
-    req.userId = decoded.userId;  // Assuming req object is available in middleware
-    next();
+    userId = decoded.userId;
+    console.log(userId)
   } catch (err) {
     console.error('Error verifying token:', err);
-    return res.status(401).json({ message: 'Invalid token' });
+    return { message: 'Invalid token' };
   }
 }
 
@@ -83,7 +80,7 @@ function verifyToken(token, res) { // Pass res object for error handling
 module.exports = {
   hashPassword,
   generateJWT,
-  secureCompare,
+  comparePassword,
   verifyToken,
   //refreshToken
 };
