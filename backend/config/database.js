@@ -1,5 +1,4 @@
 require("dotenv").config();
-
 const { Sequelize } = require("sequelize");
 
 // Database configuration using environment variables
@@ -7,7 +6,7 @@ const { Sequelize } = require("sequelize");
  * Sequelize instance for connecting to the database.
  * @type {Sequelize}
  */
-const sequelize = new Sequelize(
+const storage = new Sequelize(
   process.env.DB,
   process.env.DB_USER,
   process.env.DB_PASSWORD,
@@ -18,4 +17,4 @@ const sequelize = new Sequelize(
   },
 );
 
-module.exports = sequelize;
+module.exports = { storage };
