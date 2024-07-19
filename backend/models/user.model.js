@@ -1,5 +1,5 @@
 const { DataTypes, sequelize } = require("sequelize");
-const sequelize = require("../config/database");
+const { storage } = require("../config/database");
 
 /**
  * Represent the User model.
@@ -12,7 +12,7 @@ const sequelize = require("../config/database");
  */
 
 
-const User = sequelize.define("User", {
+const User = storage.define("User", {
   id: {
     type: DataTypes.UUID,
     allowNull: false,
