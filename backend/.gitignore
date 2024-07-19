@@ -28,3 +28,4 @@ logs
 
 # sytem log files
 ../.trunk/
+backend/config/database.js
