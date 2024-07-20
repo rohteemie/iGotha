@@ -1,3 +1,7 @@
+/**
+ * This module defines relationship between all entities/models
+ */
+
 const { User } = require('./user.model')
 const { Message  } = require('./message.model')
 const { Chat } = require('./chat.model')
