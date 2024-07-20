@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const { storage } = require('../config/database');
 
 /**
  * Represents the Message model
