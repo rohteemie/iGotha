@@ -38,7 +38,22 @@ const User = storage.define("User", {
     type: DataTypes.DATE,
     allowNull: false,
     defaultValue: sequelize.NOW
-  }
+  },
+  status: {
+    type: DataTypes.ENUM('online', 'offline'),
+    defaultValue: 'offline'
+  },
+  last_seen: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  is_guest: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
+}, {
+  // Enables automatic timestamps (createdAt & UpdatedAt)
+  timestamps: true
 });
 
 module.exports = User;
