@@ -29,16 +29,6 @@ const User = storage.define("User", {
     allowNull: false,
     unique: true,
   },
-  createdAt: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: sequelize.NOW
-  },
-  updatedAt: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: sequelize.NOW
-  },
   status: {
     type: DataTypes.ENUM('online', 'offline'),
     defaultValue: 'offline'
