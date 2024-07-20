@@ -1,6 +1,15 @@
 const { storage } = require('../config/database')
-const { DataTypes } = require('sequelize')
+const { DataTypes, Model } = require('sequelize')
 
+/**
+ * Represent Group models
+ * @typedef {Object} Group
+ * @property {string} id - Group identifier
+ * @property {string} name - Group name
+ * @property {string} [description] - Group description (nullable)
+ */
+
+/** @type {Model} */
 const Group = storage.define('Group', {
   id: {
     type: DataTypes.UUID,
