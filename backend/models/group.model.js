@@ -16,6 +16,8 @@ const Group = storage.define('Group', {
     type: DataTypes.STRING,
     allowNull: true
   }
+}, {
+  timestamps: true
 });
 
 module.exports = Group
