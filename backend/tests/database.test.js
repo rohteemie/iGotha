@@ -2,7 +2,7 @@
  * This file is responsible for testing the database functionality.
  */
 const { Sequelize } = require('sequelize');
-const dotenv = require('dotenv').config();
+require('dotenv').config();
 
 
 describe('Database Connection', () => {
@@ -26,11 +26,6 @@ describe('Database Connection', () => {
   });
 
   test('should establish a connection successfully', async () => {
-    try {
       await sequelize.authenticate();
-      console.log('Connection established successfully!');
-    } catch (error) {
-      console.error('Unable to connect to the database:', error);
-    }
   });
 });
