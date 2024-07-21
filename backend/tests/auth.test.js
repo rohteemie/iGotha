@@ -1,6 +1,6 @@
 const { storage } = require('../config/database');
 const { Auth } = require('../models/auth.model');
-const { validate_uuid } = require('../helper/validate');
+const { validate_uuid, validate_email, validate_password } = require('../helper/validate');
 
 
 
@@ -67,4 +67,16 @@ describe('Auth Model', () => {
       },
     });
   });
+
+
+  test(`Validate email and password field to check if it's valid`, async () => {
+    const email = 'testmail@testmail.com';
+    const password = 'TestPass123@.';
+
+    expect(validate_email(email)).toBeTruthy();
+    expect(validate_password(password)).toBeTruthy();
+
+
+  });
+
 });
