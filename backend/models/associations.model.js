@@ -3,10 +3,14 @@
  */
 
 const { User } = require('./user.model')
-const { Message  } = require('./message.model')
+const { Message } = require('./message.model')
 const { Chat } = require('./chat.model')
-const { Group } = require('./group.model')
+const { Group } = require('./group.model');
+const { storage } = require('../config/database');
 
+
+const UserGroup = storage.define('UserGroups', {});
+const UserChat = storage.define('UserChats', {});
 
 // A User can participate in multiple Chats
 User.belongsToMany(Chat, { through: 'UserChat' });
