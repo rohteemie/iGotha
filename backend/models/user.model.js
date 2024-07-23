@@ -1,4 +1,4 @@
-const { DataTypes, Model } = require("sequelize");
+const { DataTypes } = require("sequelize");
 const { storage } = require("../config/database");
 
 /**
@@ -15,7 +15,7 @@ const { storage } = require("../config/database");
  * @property {boolean} is_guest - Indicates if the user is a guest.
  */
 
-/** @type {Model} */
+// /** @type {Sequelize} */
 const User = storage.define("User", {
   id: {
     type: DataTypes.UUID,
@@ -50,4 +50,4 @@ const User = storage.define("User", {
   timestamps: true
 });
 
-module.exports = User;
+module.exports = { User };

@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const { storage } = require('../config/database');
 
-const Chat = sequelize.define('Chat', {
+const Chat = storage.define('Chat', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
@@ -15,4 +15,4 @@ const Chat = sequelize.define('Chat', {
     }
 });
 
-module.exports = Chat;
+module.exports = { Chat };

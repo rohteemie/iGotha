@@ -11,8 +11,8 @@ const { storage } = require('../config/database');
  * @property {boolean} typing_indicator - indicate if message is being typed
  */
 
-/** @type {Model} */
-const Message = sequelize.define('Message', {
+
+const Message = storage.define('Message', {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -39,4 +39,4 @@ const Message = sequelize.define('Message', {
   timestamps: true
 });
 
-module.exports = Message;
+module.exports = { Message };

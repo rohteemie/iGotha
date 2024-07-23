@@ -9,7 +9,6 @@ const { DataTypes, Model } = require('sequelize')
  * @property {string} [description] - Group description (nullable)
  */
 
-/** @type {Model} */
 const Group = storage.define('Group', {
   id: {
     type: DataTypes.UUID,
@@ -29,4 +28,4 @@ const Group = storage.define('Group', {
   timestamps: true
 });
 
-module.exports = Group
+module.exports = { Group };
