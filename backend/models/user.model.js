@@ -18,7 +18,7 @@ const { DataTypes } = require('sequelize');
 const User = storage.define(
 	'User',
 	{
-		id: {
+	id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true
@@ -27,11 +27,11 @@ const User = storage.define(
         type: DataTypes.STRING,
         allowNull: false,
     },
-		first_name: {
+	first_name: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-		last_name: {
+	last_name: {
         type: DataTypes.STRING,
         allowNull: true,
     },
