@@ -28,6 +28,8 @@
     "node-schedule": "^2.1.1",
     "sequelize": "^6.37.3",
     "sequelize-cli": "^6.6.2",
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5",
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
