@@ -1,103 +1,97 @@
 const { storage } = require('../config/database');
 const { Auth } = require('../models/auth.model');
+const { User } = require('../models/user.model');
 const {
-   hashPassword,
-   comparePassword,
+   compareHash,
    generateJWT,
-   reset_login_count
-  } = require('../helper/auth.util');
-const schedule = require('node-schedule');
-
+} = require('../helper/auth.util');
 
 /**
- * Schedule reset_login_count to run periodically every minutes.
- * This ensures locked accounts are unlocked after the lock duration.
+ * Handles user login by verifying credentials and generating a JWT token.
+ *
+ * @async
+ * @function login
+ * @param {Object} req - The request object.
+ * @param {Object} req.body - The body of the request.
+ * @param {string} req.body.email - The email of the user attempting to log in.
+ * @param {string} req.body.password - The password of the user attempting to log in.
+ * @param {Object} res - The response object.
+ * @returns {Promise<void>} - Returns a JSON response with user data and access token if successful, or an error message if not.
+ *
+ * @throws {Error} - Throws an error if there is an issue during the login process.
  */
-const unlockJob = schedule.scheduleJob('* * * * *', reset_login_count);
+async function login(req, res) {
+    const { email, password } = req.body;
 
+    try {
+        await storage.sync();
 
-/**
- * Authenticates a user by checking their email and password.
- * @param {string} email - The user's email.
- * @param {string} password - The user's password.
- * @returns {Promise<Object>} - A promise that resolves to an object containing a message or a token.
- */
-async function login(email, password) {
-  try {
-    await storage.sync();
+        const user = await Auth.findOne({ where: { email } });
+        if (!user) {
+            return res.status(401).json({ message: 'Wrong email' });
+        }
 
-    const user = await Auth.findOne({ where: { email } });
+        if (user.failed_login_count >= 5 && user.account_locked) {
+            return res.status(403).json({ message: 'Account is locked, try again later!' });
+        }
 
-    if (!user) {
-      console.log({ message: 'Invalid email, None registerd user!'})
-      return { message: 'Invalid email', status: 401 };
+        const passwordMatches = await compareHash(password, user.password);
+        if (!passwordMatches) {
+            const newFailedLoginCount = user.failed_login_count + 1;
+
+            await Auth.update({
+                failed_login_count: newFailedLoginCount,
+                account_locked: newFailedLoginCount >= 5 ? true : user.account_locked,
+                account_locked_date: newFailedLoginCount >= 5 ? new Date() : user.account_locked_date,
+            }, {
+                where: { email: user.email }
+            });
+            return res.status(401).json({ message: 'Wrong password' });
+        }
+
+        const accessToken = generateJWT(user.id);
+        const userData = await User.findOne({ where: { email } });
+
+        if (userData) {
+            await Auth.update({
+                failed_login_count: 0,
+                account_locked: false,
+                account_locked_date: null,
+            }, {
+                where: { email: user.email }
+            });
+        }
+
+        await User.update({
+            last_seen: new Date()
+        }, {
+            where: { username: userData.username }
+        });
+
+        return res.status(200).json({ userData, accessToken });
+    } catch (error) {
+        console.error('Error during login:', error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
-
-    if (user.failed_login_count >= 5) {
-      console.log({ message: 'Account is locked, try again later!' })
-      return { message: 'Account is locked, try again later!', status: 403 };
-    }
-
-    const passwordMatches = await comparePassword(password, user.password);
-
-    if (!passwordMatches) {
-      user.failed_login_count += 1;
-
-      if (user.failed_login_count >= 5) {
-        user.account_locked = true;
-        user.account_locked_date = new Date();
-      }
-
-      await user.save();
-
-      if (user.account_locked) {
-        console.log({message: 'Account is locked, wait for 24hrs'})
-        return { message: 'Account is locked, wait for 24hrs', status: 403 };
-      }
-
-      console.log({ message: 'Invalid password' })
-      return { message: 'Invalid password', status: 401 };
-    }
-
-    if (user.account_locked) {
-      console.log({ message: 'Account is locked, try again in 24hrs' })
-      return { message: 'Account is locked, try again in 24hrs', status: 401 };
-    }
-
-    const token = generateJWT(user.id);
-    console.log({token})
-    return { token, status: 200 };
-
-  } catch (error) {
-    console.error('Error during login:', error);
-    return { message: 'Internal server error', status: 500 };
-  }
 }
 
-/**
- * Registers a new user with the provided email and password.
- * @param {string} email - The email of the user.
- * @param {string} password - The password of the user.
- * @returns {Promise<Object>} - A promise that resolves to an object containing a message indicating the result of the registration process.
- */
-async function register(email, password) {
-  try {
-    await storage.sync();
 
-    const existingUser = await Auth.findOne({ where: { email } });
+async function getAllAuthInfo(req, res) {
+    try {
+        await storage.sync();
 
-    if (existingUser) {
-      return { message: 'User already exists', status: 400 };
+        const authInfo = await Auth.findAll();
+
+        return res.status(200).json(authInfo);
+    } catch (error) {
+        console.error('Error fetching authentication info:', error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
-
-    const hashedPassword = await hashPassword(password);
-    await Auth.create({ email, password: hashedPassword });
-
-    return { message: 'User created successfully', status: 201 };
-  } catch (error) {
-    console.error('Error creating user:', error);
-    return { message: 'Internal server error', status: 500 };
-  }
 }
 
-module.exports = { register, login };
+
+
+module.exports = {
+    login,
+    getAllAuthInfo
+};

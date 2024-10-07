@@ -38,8 +38,7 @@ const User = storage.define(
     email: {
         type: DataTypes.STRING,
         allowNull: true,
-        unique: true,
-        defaultValue: ''
+        unique: true
       },
     status: {
         type: DataTypes.ENUM('online', 'offline'),
@@ -51,7 +50,7 @@ const User = storage.define(
     },
     is_guest: {
         type: DataTypes.BOOLEAN,
-        defaultValue: true
+        defaultValue: false
     }
 	},
 );

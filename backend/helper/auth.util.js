@@ -12,10 +12,10 @@ require('dotenv').config();
  * @returns {Promise<string>} A promise that resolves with the hashed password.
  * @throws {Error} If there is an error while hashing the password.
  */
-async function hashPassword(password) {
+async function hashData(data) {
   try {
     const salt = await bcrypt.genSalt(10);
-    const hash = await bcrypt.hash(password, salt);
+    const hash = await bcrypt.hash(data, salt);
     return hash;
   } catch (err) {
     throw new Error('Error hashing password:', err);
@@ -30,9 +30,9 @@ async function hashPassword(password) {
  * @param {string} userPassword - The user's password to compare.
  * @returns {boolean} - Returns true if the passwords match, false otherwise.
  */
-async function comparePassword(plainPassword, hashedPassword) {
+async function compareHash(plainData, hashedData) {
   try {
-    return await bcrypt.compare(plainPassword, hashedPassword);
+    return await bcrypt.compare(plainData, hashedData);
   } catch (err) {
     throw new Error('Error comparing passwords:', err);
   }
@@ -45,39 +45,50 @@ async function comparePassword(plainPassword, hashedPassword) {
  *
  * @param {string} userId - The user ID for which the JWT is generated.
  * @returns {string} The generated JWT.
- * @throws {Error} If an invalid user ID is provided.
  */
-function generateJWT(userId) {
+function generateJWT(id) {
   const secretKey = process.env.JWT_SECRET;
   const expiresIn = process.env.EXPIRE_IN;
 
   try {
-    return jwt.sign({ userId }, secretKey, { expiresIn });
+    return jwt.sign({ id }, secretKey, { expiresIn, algorithm: 'HS256' });
   } catch (error) {
     console.error('Error generating JWT:', error);
     throw error;
   }
 }
 
-
-
 /**
  * Verifies the authenticity of a JSON Web Token (JWT).
  * @param {string} token - The JWT to be verified.
- * @param {object} res - The response object for error handling.
  */
 function verifyToken(token) {
-  try {
-    const secretKey = process.env.JWT_SECRET;
-    const decoded = jwt.verify(token, secretKey);
+  const secretKey = process.env.JWT_SECRET;
 
-    userId = decoded.userId;
-    console.log(userId)
+  if (!secretKey) {
+    console.error('Secret key is missing');
+    return { message: 'Internal server error: Missing secret key' };
+  }
+
+  if (!token) {
+    return { message: 'Token not provided' };
+  }
+
+  try {
+    const decodedToken = jwt.verify(token, secretKey);
+
+    const decodedUserId = decodedToken.id;
+    return decodedUserId;
+
   } catch (err) {
-    console.error('Error verifying token:', err);
-    return { message: 'Invalid token' };
+    console.error('Error verifying token:', err.message);
+
+    // Return a standardized error response
+    return { message: 'Token Expired or not valid' };
   }
 }
+
+
 
 
 /**
@@ -93,7 +104,6 @@ const reset_login_count = async function () {
 
     const now = new Date();
 
-    // Find all users with locked accounts
     const lockedUsers = await Auth.findAll({
       where: {
         account_locked: true,
@@ -125,10 +135,9 @@ const reset_login_count = async function () {
 
 
 module.exports = {
-  hashPassword,
+  hashData,
   generateJWT,
-  comparePassword,
+  compareHash,
   verifyToken,
-  //refreshToken
   reset_login_count
 };
