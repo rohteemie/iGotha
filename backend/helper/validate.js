@@ -8,7 +8,7 @@ const { v4: uuidv4, validate: isUuid } = require('uuid');
  * @param {string} email - The email address to validate.
  * @returns {boolean|string} - Returns `true` if the email is valid, otherwise returns an error message.
  */
-function email(email) {
+function my_email(email) {
   const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
   if (!emailRegex.test(email)) {
     return 'Invalid email format.';
@@ -28,7 +28,7 @@ function email(email) {
  * @param {string} password - The password to be validated.
  * @returns {boolean|string} - Returns true if the password is valid. Otherwise, returns an error message.
  */
-function password(password) {
+function my_password(password) {
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&-_]{8,}$/;
   if (!passwordRegex.test(password)) {
     return 'Password must be at least 8 characters and include a lowercase letter, uppercase letter, number, and special symbol.';
@@ -44,7 +44,7 @@ function password(password) {
  * @returns {boolean|string} - Returns `true` if valid, or an error message on failure.
  *
  */
-function validate_uuid(data) {
+function my_uuid(data) {
 	if (!isUuid(data.uuid)) {
 	  return 'Invalid UUID format.';
 	}
@@ -53,4 +53,4 @@ function validate_uuid(data) {
 
 
 
-module.exports = { validate_uuid, email, password };
+module.exports = { my_uuid, my_email, my_password };
