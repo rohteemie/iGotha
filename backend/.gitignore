@@ -28,3 +28,5 @@ logs
 
 # sytem log files
 ../.trunk/
+.gitignore
+app.js
