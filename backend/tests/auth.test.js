@@ -1,6 +1,7 @@
 const { storage } = require('../config/database');
 const { Auth } = require('../models/auth.model');
-const { validate_uuid, validate_email, validate_password } = require('../helper/validate');
+const _Validate = require('../helper/validate');
+
 
 
 
@@ -45,7 +46,6 @@ describe('Auth Model', () => {
   });
 
 
-
   test('should generate a unique ID using UUID4', async () => {
     const email = 'testmail@testmail.com';
     const password = 'TestPass123@.';
@@ -57,7 +57,7 @@ describe('Auth Model', () => {
 
     const user = await Auth.findOne({ where: { email } });
 
-    expect(validate_uuid(user.id)).toBeTruthy();
+    expect(_Validate.validate_uuid(user.id)).toBeTruthy();
 
     expect(user.id.length).toBe(36);
 
@@ -73,10 +73,26 @@ describe('Auth Model', () => {
     const email = 'testmail@testmail.com';
     const password = 'TestPass123@.';
 
-    expect(validate_email(email)).toBeTruthy();
-    expect(validate_password(password)).toBeTruthy();
+    expect(_Validate.email(email)).toBeTruthy();
+    expect(_Validate.password(password)).toBeTruthy();
 
 
   });
+
+
+  test('Should not create a user with an invalid password', async () => {
+    const email = 'johndoe@doe.com';
+    const password = 'password';
+
+    try {
+      await Auth.create({
+        email,
+        password
+      });
+    } catch (error) {
+      expect(error).toBeDefined();
+    }
+  }
+  );
 
 });

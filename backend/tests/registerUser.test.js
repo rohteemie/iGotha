@@ -1,0 +1,36 @@
+const { registerUser } = require('../services/user.service');
+const { User } = require('../models/user.model');
+const { Auth } = require('../models/auth.model');
+const { hashData } = require('../helper/auth.util');
+const validate = require('../helper/validate');
+
+describe('registerUser', () => {
+  let req, res;
+
+  beforeEach(() => {
+    req = { body: { username: 'john_doe', email: 'john@example.com', password: 'Password123!' } };
+    res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+  });
+
+  it('should register a new user successfully', async () => {
+    User.create = jest.fn().mockResolvedValue({});
+    Auth.create = jest.fn().mockResolvedValue({});
+    hashData.mockResolvedValue('hashed_password');
+    validate.email = jest.fn();
+    validate.password = jest.fn();
+
+    await registerUser(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({ message: 'User created successfully' });
+  });
+
+  it('should return 400 if email or password is missing', async () => {
+    req.body = { username: 'john_doe' };
+
+    await registerUser(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Email or Password is missing' });
+  });
+});
