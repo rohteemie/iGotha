@@ -1,8 +1,15 @@
+#!/usr/bin/env node
+/**
+ * @file /home/fin/backend/routes/user.route.js
+ * @description This file contains the routes for user-related operations.
+ */
+
 const express = require('express');
 const router = express.Router();
 const user_service = require('../services/user.service');
 const rateLimit = require('express-rate-limit');
 const validate = require('../helper/validate');
+
 
 /**
  * @module routes/user
@@ -11,6 +18,43 @@ const validate = require('../helper/validate');
  * @requires express-rate-limit
  * @requires ../helper/validate
  */
+
+ /**
+	* @name /
+	* @function
+	* @description Route to get all users.
+	* @memberof module:routes/user
+	* @inner
+	* @param {function} user_service.getAllUsers - Controller function to get all users.
+	*/
+
+ /**
+	* @name /create
+	* @function
+	* @description Route to create a new user.
+	* @memberof module:routes/user
+	* @inner
+	* @param {function} user_service.registerUser - Controller function to register a new user.
+	*/
+
+ /**
+	* @name /:username
+	* @function
+	* @description Route to get a user by username.
+	* @memberof module:routes/user
+	* @inner
+	* @param {function} user_service.getUserName - Controller function to get a user by username.
+	*/
+
+ /**
+	* @name /:username
+	* @function
+	* @description  Route to update a user by username.
+	* @memberof module:routes/user
+	* @inner
+	* @param {function} user_service.updateUser - Controller function to update a user by username.
+	*/
+
 
 // Rate limiting middleware for the create user route
 const createAccountLimiter = rateLimit({

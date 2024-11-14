@@ -1,3 +1,9 @@
+#!/usr/bin/env node
+/**
+ * @file /home/fin/backend/routes/helper/validate.js
+ * @description This file contains reusable function.
+ */
+
 const { v4: uuidv4, validate: isUuid } = require('uuid');
 
 
@@ -33,7 +39,7 @@ function my_password(password) {
   if (!passwordRegex.test(password)) {
     return 'Password must be at least 8 characters and include a lowercase letter, uppercase letter, number, and special symbol.';
   }
-  return;
+  return true;
 }
 
 

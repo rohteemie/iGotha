@@ -130,15 +130,21 @@ async function updateUser(req, res) {
   try {
       await storage.sync();
 
-      const user = await User.findOne({ where: { username } });
+      const getUserId = verifyToken(req.headers['authorization']);
 
-      if (!user) {
-          return res.status(404).json({ message: 'User not found' });
+      if (!getUserId) {
+        return res.status(401).json({ message: 'Unauthorized request' });
       }
 
-      await User.update(updatedData, { where: { username } });
+      const user = await User.findOne({ where: { username } });
+      const authInfo = await Auth.findOne({ where: { email: user.email } });
 
-      return res.status(200).json({ message: 'User updated successfully' });
+      if (getUserId === authInfo.id) {
+        await User.update(updatedData, { where: { username } });
+        return res.status(200).json({ message: 'User updated successfully' });
+      } else {
+        res.status(401).json(getUserId);
+      }
   } catch (error) {
       console.error('Error updating user:', error);
       return res.status(500).json({ message: 'Internal server error' });
