@@ -31,6 +31,11 @@ const Auth = storage.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    // userId: {
+    //   type: DataTypes.STRING,
+    //   allowNull: false,
+    //   unique: true,
+    // },
     failed_login_count: {
       type: DataTypes.INTEGER,
       allowNull: false,

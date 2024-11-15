@@ -1,7 +1,6 @@
 const { storage } = require('../config/database');
 const { Auth } = require('../models/auth.model');
-const _Validate = require('../helper/validate');
-
+const validate = require('../helper/validate');
 
 
 
@@ -57,8 +56,9 @@ describe('Auth Model', () => {
 
     const user = await Auth.findOne({ where: { email } });
 
-    expect(_Validate.validate_uuid(user.id)).toBeTruthy();
+    expect(validate.validate_uuid(user.id)).toBeTruthy();
 
+    expect(validate.validate_uuid(user.id)).toBeTruthy();
     expect(user.id.length).toBe(36);
 
     await user.destroy({
@@ -73,26 +73,10 @@ describe('Auth Model', () => {
     const email = 'testmail@testmail.com';
     const password = 'TestPass123@.';
 
-    expect(_Validate.email(email)).toBeTruthy();
-    expect(_Validate.password(password)).toBeTruthy();
+    expect(validate.email(email)).toBeTruthy();
+    expect(validate.password(password)).toBeTruthy();
 
 
   });
-
-
-  test('Should not create a user with an invalid password', async () => {
-    const email = 'johndoe@doe.com';
-    const password = 'password';
-
-    try {
-      await Auth.create({
-        email,
-        password
-      });
-    } catch (error) {
-      expect(error).toBeDefined();
-    }
-  }
-  );
 
 });

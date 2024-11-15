@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * @file /home/fin/backend/routes/user.route.js
  * @description This file contains the routes for user-related operations.
@@ -44,7 +45,7 @@ const user_service = require('../services/user.service');
  /**
 	* @name /:username
 	* @function
-	* @description Route to update a user by username.
+	* @description  Route to update a user by username.
 	* @memberof module:routes/user
 	* @inner
 	* @param {function} user_service.updateUser - Controller function to update a user by username.
