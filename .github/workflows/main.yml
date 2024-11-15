@@ -58,5 +58,5 @@ jobs:
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key
           chmod 600 private_key
-          rsync -avz -e "ssh -i private_key" ./iGotha/backend $SERVER_USER@$SERVER_HOST:~/iGotha/backend
+          rsync -avz -e "ssh -i private_key" ./iGotha $SERVER_USER@$SERVER_HOST:~/iGotha
           rm private_key
