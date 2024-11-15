@@ -4,7 +4,7 @@
   "description": "This  is a social app for in-organisation that may be used as a temporary means of exchanging information among staffs at Autemus incorporation",
   "main": "index.js",
   "scripts": {
-    "test": "jest --env=.env.test"
+    "test": "NODE_ENV=test jest"
   },
   "repository": {
     "type": "git",
