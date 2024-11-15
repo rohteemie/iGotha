@@ -19,11 +19,11 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
-        working-directory: ~/
+        working-directory: ~/iGotha
         run: npm install
 
       - name: Run tests
-        working-directory: ~/
+        working-directory: ~/iGotha
         env:
           NODE_ENV: test
           DB_HOST: ${{ secrets.DB_HOST }}
@@ -46,7 +46,7 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
-        working-directory: ./backend
+        working-directory: ./~
         run: npm install
 
       - name: Deploy to Server
