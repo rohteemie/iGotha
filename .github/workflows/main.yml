@@ -19,11 +19,11 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
-        working-directory: ./backend
+        working-directory: ~/iGotha/backend
         run: npm install
 
       - name: Run tests
-        working-directory: ./backend
+        working-directory: ~/iGotha/backend
         env:
           NODE_ENV: test
           DB_HOST: ${{ secrets.DB_HOST }}
@@ -46,7 +46,7 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
-        working-directory: ./backend
+        working-directory: ~/iGotha/backend
         run: npm install
 
       - name: Deploy to Server
@@ -57,5 +57,5 @@ jobs:
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key
           chmod 600 private_key
-          rsync -avz -e "ssh -i private_key" ~/backend $SERVER_USER@$SERVER_HOST:~/iGotha/backend
+          rsync -avz -e "ssh -i private_key" ~/iGotha $SERVER_USER@$SERVER_HOST:~/iGotha
           rm private_key  # Clean up for security
