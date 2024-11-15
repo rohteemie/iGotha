@@ -11,13 +11,13 @@ describe('Database Connection', () => {
 
   beforeAll(() => {
     sequelize = new Sequelize(
-      'test_database',
-      'test_user',
-      'Test_password1.',
+      process.env.DB_NAME || "test_db",
+      process.env.DB_USER || "test_user",
+      process.env.DB_PASSWORD || "Test_password1.",
       {
-        host: 'localhost',
-        dialect: 'mysql',
-        logging: false
+        host: process.env.DB_HOST || "localhost",
+        dialect: process.env.DB_DIALECT || "mysql",
+        logging: false,
       }
     );
   });
