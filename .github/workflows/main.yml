@@ -19,7 +19,7 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
-        working-directory: ~/iGotha
+        working-directory: ~/
         run: npm install
 
       - name: Run tests
