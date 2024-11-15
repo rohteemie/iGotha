@@ -1,8 +1,9 @@
 /**
  * This file is responsible for testing the database functionality.
  */
-const { Sequelize } = require('sequelize');
-require('dotenv').config();
+const path = process.env.NODE_ENV === "test" ? ".env.test" : ".env";
+require("dotenv").config({ path });
+const { Sequelize } = require("sequelize");
 
 
 describe('Database Connection', () => {
