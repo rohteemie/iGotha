@@ -3,7 +3,7 @@ name: iGotha CI/CD Workflow
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   build-and-test:
@@ -16,14 +16,14 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '22'  # Node.js 22, as per your server setup
+          node-version: '22'
 
       - name: Install dependencies
-        working-directory: ./iGotha/backend  # Navigate to backend directory
+        working-directory: ./backend
         run: npm install
 
       - name: Run tests
-        working-directory: ./iGotha/backend
+        working-directory: ./backend
         env:
           NODE_ENV: test
           DB_HOST: ${{ secrets.DB_HOST }}
@@ -46,7 +46,7 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
-        working-directory: ./iGotha/backend
+        working-directory: ./backend
         run: npm install
 
       - name: Deploy to Server
@@ -57,5 +57,5 @@ jobs:
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key
           chmod 600 private_key
-          rsync -avz -e "ssh -i private_key" ./iGotha/backend $SERVER_USER@$SERVER_HOST:/path/to/your/app/backend
-          rm private_key  # Clean up for security
+          rsync -avz -e "ssh -i private_key" ./iGotha/backend $SERVER_USER@$SERVER_HOST:~/iGotha/backend
+          rm private_key
