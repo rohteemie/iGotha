@@ -46,7 +46,7 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
-        working-directory: ./backend
+        working-directory: ./iGotha
         run: npm install
 
       - name: Deploy to Server
