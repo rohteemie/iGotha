@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: iGotha-backend-service
+    ports:
+      - "3500:3500"
+    env_file: .env # Load environment variables for the app
+    depends_on:
+      - iGotha-db # Ensure MySQL starts before the app
+    networks:
+      - app-network
+
+  iGotha-db:
+    image: mysql:8.0
+    container_name: iGotha-storage
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - app-network
+
+volumes:
+  db-data: # Persistent storage for MySQL
+
+networks:
+  app-network: # Shared network for app and db
