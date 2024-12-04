@@ -1,6 +1,6 @@
 const path = process.env.NODE_ENV === "test" ? ".env.test" : ".env";
 require("dotenv").config({ path });
-const { Sequelize } = require("sequelize");
+const { Sequelize, DataTypes } = require("sequelize");
 
 // Database configuration using environment variables
 /**
@@ -18,4 +18,4 @@ const storage = new Sequelize(
   },
 );
 
-module.exports = { storage };
+module.exports = { storage, DataTypes };
