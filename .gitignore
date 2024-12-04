@@ -133,3 +133,4 @@ dist
 # Some are not needed to be pushed to the main repository
 doNotPushMain.yml
 .gitignore
+impt.txt
