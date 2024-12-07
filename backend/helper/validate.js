@@ -50,7 +50,7 @@ function my_password(password) {
  * @returns {boolean|string} - Returns `true` if valid, or an error message on failure.
  *
  */
-function my_uuid(data) {
+function validate_uuid(data) {
 	if (!isUuid(data.uuid)) {
 	  return 'Invalid UUID format.';
 	}
@@ -59,4 +59,4 @@ function my_uuid(data) {
 
 
 
-module.exports = { validate_uuid, email, password };
+module.exports = { validate_uuid, my_email, my_password };
