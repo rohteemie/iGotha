@@ -55,7 +55,7 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy to Server
+      - name: Deploy to Server and Run Migrations
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SERVER_USER: ${{ secrets.SERVER_USER }}
@@ -65,12 +65,22 @@ jobs:
           chmod 600 private_key
 
           # Sync the backend code to the server
-          # rsync -avz -e "ssh -i private_key" ./backend/ $SERVER_USER@$SERVER_HOST:~/iGotha/backend # My Option 1
-          ssh -i private_key $SERVER_USER@$SERVER_HOST "cd ~/iGotha && git pull origin main && pm2 restart app"
+          rsync -avz -e "ssh -i private_key" ./backend/ $SERVER_USER@$SERVER_HOST:~/iGotha/backend
 
-          # SSH into the server to restart the service
+          # SSH into the server to pull changes, run migrations, and restart the service
           ssh -i private_key $SERVER_USER@$SERVER_HOST << 'EOF'
             cd ~/iGotha/backend
+
+            # Pull the latest code (in case rsync is not used)
+            git pull origin main
+
+            # Install dependencies on the server
+            npm install
+
+            # Run database migrations
+            npm run migrate
+
+            # Restart the application using PM2
             pm2 restart server
           EOF
 
