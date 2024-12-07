@@ -1,6 +1,6 @@
 const { storage } = require('../config/database');
 const { Auth } = require('../models/auth.model');
-const { User } = require('../models/user.model');
+const { User } = require('../models/associations.model');
 const {
    compareHash,
    generateJWT,

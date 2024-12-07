@@ -1,42 +1,55 @@
-const { DataTypes } = require('sequelize');
-const { storage } = require('../config/database');
-
 /**
- * Represents the Message model
+ * Represents the Message model.
+ *
  * @typedef {Object} Message
- * @property {string} id - The unique Identifier of a message
- * @property {string} content - Message content
- * @property {Date} timestamp - Time of message
- * @property {boolean} read_receipt - indicator to indicate message read by recipient
- * @property {boolean} typing_indicator - indicate if message is being typed
+ * @property {string} id - The unique identifier for a message (UUID).
+ * @property {string} content - The content of the message.
+ * @property {boolean} readReceipt - Indicates whether the message has been read by the recipient (default: false).
+ * @property {Date} createdAt - Timestamp for when the message was created.
+ * @property {Date} updatedAt - Timestamp for when the message was last updated.
  */
 
+module.exports = (storage, DataTypes) => {
+  const Message = storage.define(
+    'Message',
+    {
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        allowNull: false,
+        primaryKey: true,
+      },
+      content: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+      },
+      readReceipt: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+      },
+    },
+    {
+      timestamps: true,
+      tableName: 'messages',
+    }
+  );
 
-const Message = storage.define('Message', {
-  id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    primaryKey: true
-  },
-  content: {
-    type: DataTypes.TEXT,
-    allowNull: false
-  },
-  timestamp: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: DataTypes.NOW
-  },
-  read_receipt: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false
-  },
-  typing_indicator: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false
-  }
-}, {
-  timestamps: true
-});
+  Message.associate = (models) => {
+    // A message belongs to one chat
+    Message.belongsTo(models.Chat, {
+      foreignKey: 'chatId',
+      as: 'chat',
+      onDelete: 'CASCADE',
+    });
 
-module.exports = { Message };
+    // A message is sent by a user
+    Message.belongsTo(models.User, {
+      foreignKey: 'senderId',
+      as: 'sender',
+      onDelete: 'CASCADE',
+    });
+  };
+
+  return Message;
+};

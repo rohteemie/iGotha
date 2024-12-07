@@ -1,40 +1,21 @@
-const { User } = require('../models/user.model');
-const { storage } = require('../config/database');
 const { Auth } = require('../models/auth.model');
-const { verifyToken } = require('../helper/auth.util');
-const { hashData } = require('../helper/auth.util');
+
+const { User } = require('../models/associations.model');
+const { verifyToken, hashData } = require('../helper/auth.util');
 const randomUser = require('../helper/user.util');
 const validate = require('../helper/validate');
 
 async function doesUserExist(email) {
   const userExist = await User.findOne({ where: { email } });
   const authExist = await Auth.findOne({ where: { email } });
-  return userExist || authExist;
+  return userExist || authExist || null;
 }
-
-/**
- * Registers a new user with the provided details.
- *
- * @param {Object} userDetails - User details like username, first_name, last_name, etc.
- * @returns {Promise<Object>} - A promise resolving to an object with a message and status code indicating registration result.
- */
-/**
- * Registers a new user or a guest user based on the request body.
- *
- * @async
-/**
- * Registers a new user or a guest user based on the request body.
- *
- * @async
-*/
 
 async function registerUser(req, res) {
   console.log('Request Body:', req.body);
   const userDetails = req.body;
 
   try {
-    await storage.sync();
-
     const userType = randomUser();
 
     if (Object.keys(userDetails).length === 0) {
@@ -43,7 +24,7 @@ async function registerUser(req, res) {
         first_name: userType,
         last_name: userType,
         is_guest: true,
-        email: null
+        email: null,
       };
 
       await User.create(guestUser);
@@ -74,92 +55,77 @@ async function registerUser(req, res) {
   }
 }
 
-
-
-/**
- * Fetches user details using the provided username.
- *
- * @param {string} username - The username of the user.
- * @returns {Promise<Object>} - A promise resolving to an object containing the user details or an error message.
- */
 async function getUserName(req, res) {
   const { username } = req.params;
 
   try {
     const userDetails = await User.findOne({ where: { username } });
-    const authDetails = await Auth.findOne({ where: { email: userDetails.email } });
-    const auth = verifyToken(req.headers['authorization']);
+    if (!userDetails) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
+    const authDetails = await Auth.findOne({ where: { email: userDetails.email } });
+    if (!authDetails) {
+      return res.status(404).json({ message: 'Auth details not found' });
+    }
+
+    const auth = verifyToken(req.headers['authorization']);
     if (!auth) {
       return res.status(401).json({ message: 'Unauthorized request' });
     }
 
-    if (!await doesUserExist(userDetails.email)) {
-      return res.status(404).json({ message: 'Register User not found' });
-    }
-
     if (auth === authDetails.id) {
-      res.status(200).json(userDetails);
+      return res.status(200).json(userDetails);
     } else {
-      res.status(401).json(auth);
+      return res.status(401).json({ message: 'Invalid token' });
     }
-
   } catch (error) {
     console.error('Error fetching user:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json({ message: 'Internal server error' });
   }
 }
-
-
 
 async function getAllUsers(req, res) {
   try {
-      await storage.sync();
-
-      const users = await User.findAll();
-
-      return res.status(200).json(users);
+    const users = await User.findAll();
+    return res.status(200).json(users);
   } catch (error) {
-      console.error('Error fetching all users:', error);
-      return res.status(500).json({ message: 'Internal server error' });
+    console.error('Error fetching all users:', error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 }
-
-
 
 async function updateUser(req, res) {
   const { username } = req.params;
   const updatedData = req.body;
 
   try {
-      await storage.sync();
+    const getUserId = verifyToken(req.headers['authorization']);
+    if (!getUserId) {
+      return res.status(401).json({ message: 'Unauthorized request' });
+    }
 
-      const getUserId = verifyToken(req.headers['authorization']);
+    const user = await User.findOne({ where: { username } });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
-      if (!getUserId) {
-        return res.status(401).json({ message: 'Unauthorized request' });
-      }
-
-      const user = await User.findOne({ where: { username } });
-      const authInfo = await Auth.findOne({ where: { email: user.email } });
-
-      if (getUserId === authInfo.id) {
-        await User.update(updatedData, { where: { username } });
-        return res.status(200).json({ message: 'User updated successfully' });
-      } else {
-        res.status(401).json(getUserId);
-      }
+    const authInfo = await Auth.findOne({ where: { email: user.email } });
+    if (getUserId === authInfo.id) {
+      await User.update(updatedData, { where: { username } });
+      return res.status(200).json({ message: 'User updated successfully' });
+    } else {
+      return res.status(401).json({ message: 'Unauthorized request' });
+    }
   } catch (error) {
-      console.error('Error updating user:', error);
-      return res.status(500).json({ message: 'Internal server error' });
+    console.error('Error updating user:', error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 }
-
-
 
 module.exports = {
   registerUser,
   getUserName,
   getAllUsers,
-  updateUser
+  updateUser,
 };
