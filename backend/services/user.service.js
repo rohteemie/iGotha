@@ -3,7 +3,6 @@ const { Auth } = require('../models/auth.model');
 const { User } = require('../models/associations.model');
 const { verifyToken, hashData } = require('../helper/auth.util');
 const randomUser = require('../helper/user.util');
-const validate = require('../helper/validate');
 
 async function doesUserExist(email) {
   const userExist = await User.findOne({ where: { email } });
@@ -34,9 +33,6 @@ async function registerUser(req, res) {
     if (!userDetails.email || !userDetails.password) {
       return res.status(400).json({ message: 'Email or Password is missing' });
     }
-
-    validate.email(userDetails.email);
-    validate.password(userDetails.password);
 
     if (await doesUserExist(userDetails.email)) {
       return res.status(403).json({ message: 'User already exists' });
