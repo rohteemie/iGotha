@@ -73,8 +73,8 @@ describe('Auth Model', () => {
     const email = 'testmail@testmail.com';
     const password = 'TestPass123@.';
 
-    expect(validate.email(email)).toBeTruthy();
-    expect(validate.password(password)).toBeTruthy();
+    expect(validate.my_email(email)).toBeTruthy();
+    expect(validate.my_password(password)).toBeTruthy();
 
 
   });
