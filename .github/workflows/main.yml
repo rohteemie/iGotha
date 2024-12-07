@@ -38,30 +38,41 @@ jobs:
     needs: build-and-test
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '22'
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
 
-    - name: Install dependencies
-      working-directory: ./backend
-      run: npm install
+      - name: Install dependencies
+        working-directory: ./backend
+        run: npm install
 
-    - name: Add server to known_hosts
-      run: |
-        mkdir -p ~/.ssh
-        ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+      - name: Add server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
-    - name: Deploy to Server
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        SERVER_USER: ${{ secrets.SERVER_USER }}
-        SERVER_HOST: ${{ secrets.SERVER_HOST }}
-      run: |
-        echo "$SSH_PRIVATE_KEY" > private_key
-        chmod 600 private_key
-        rsync -avz -e "ssh -i private_key" ./backend $SERVER_USER@$SERVER_HOST:~/iGotha/backend
-        rm private_key
+      - name: Deploy to Server
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+        run: |
+          echo "$SSH_PRIVATE_KEY" > private_key
+          chmod 600 private_key
+
+          # Sync the backend code to the server
+          # rsync -avz -e "ssh -i private_key" ./backend/ $SERVER_USER@$SERVER_HOST:~/iGotha/backend # My Option 1
+          ssh -i private_key $SERVER_USER@$SERVER_HOST "cd ~/iGotha && git pull origin main && pm2 restart app"
+
+          # SSH into the server to restart the service
+          ssh -i private_key $SERVER_USER@$SERVER_HOST << 'EOF'
+            cd ~/iGotha/backend
+            pm2 restart server
+          EOF
+
+          # Clean up the private key
+          rm private_key
