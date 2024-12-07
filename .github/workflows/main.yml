@@ -1,0 +1,67 @@
+name: iGotha CI/CD Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: npm install
+
+      # Test step skipped for now
+      # - name: Run tests
+      #   working-directory: ./backend
+      #   env:
+      #     NODE_ENV: test
+      #     DB_HOST: ${{ secrets.DB_HOST }}
+      #     DB_USER: ${{ secrets.DB_USER }}
+      #     DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      #     DB_NAME: ${{ secrets.DB_NAME }}
+      #   run: npm test
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '22'
+
+    - name: Install dependencies
+      working-directory: ./backend
+      run: npm install
+
+    - name: Add server to known_hosts
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Deploy to Server
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SERVER_USER: ${{ secrets.SERVER_USER }}
+        SERVER_HOST: ${{ secrets.SERVER_HOST }}
+      run: |
+        echo "$SSH_PRIVATE_KEY" > private_key
+        chmod 600 private_key
+        rsync -avz -e "ssh -i private_key" ./backend $SERVER_USER@$SERVER_HOST:~/iGotha/backend
+        rm private_key

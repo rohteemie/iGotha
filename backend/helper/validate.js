@@ -59,4 +59,4 @@ function my_uuid(data) {
 
 
 
-module.exports = { my_uuid, my_email, my_password };
+module.exports = { validate_uuid, email, password };
