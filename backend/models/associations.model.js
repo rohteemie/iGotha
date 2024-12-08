@@ -1,40 +1,30 @@
-/**
- * This module defines relationship between all entities/models
- */
+const { storage, DataTypes } = require('../config/database');
 
-const { User } = require('./user.model')
-const { Message } = require('./message.model')
-const { Chat } = require('./chat.model')
-const { Group } = require('./group.model');
-const { storage } = require('../config/database');
+// Import model factory functions
+const UserFactory = require('./user.model');
+const ChatFactory = require('./chat.model');
+const MessageFactory = require('./message.model');
+const GroupFactory = require('./group.model');
+const UserChatFactory = require('./userChat.model'); // Import UserChat factory
+const UserGroupFactory = require('./userGroup.model'); // Import UserChat factory
 
+// Initialize models
+const User = UserFactory(storage, DataTypes);
+const Chat = ChatFactory(storage, DataTypes);
+const Message = MessageFactory(storage, DataTypes);
+const Group = GroupFactory(storage, DataTypes);
+const UserChat = UserChatFactory(storage, DataTypes); // Initialize UserChat model
+const UserGroup = UserGroupFactory(storage, DataTypes); // Initialize UserGroup model
 
-const UserGroup = storage.define('UserGroups', {});
-const UserChat = storage.define('UserChats', {});
+// Add models to an object for easier access
+const models = { User, Chat, Message, Group, UserChat, UserGroup };
 
-// A User can participate in multiple Chats
-User.belongsToMany(Chat, { through: 'UserChat' });
-Chat.belongsToMany(User, { through: 'UserChat' });
+// Call associate method for each model, if it exists
+Object.values(models).forEach((model) => {
+    if (model.associate) {
+        model.associate(models);
+    }
+});
 
-// A User can be part of multiple Groups
-User.belongsToMany(Group, { through: 'UserGroup' });
-Group.belongsToMany(User, { through: 'UserGroup' });
-
-// A User can have multiple Messages
-User.hasMany(Message);
-Message.belongsTo(User);
-
-// A Message is part of one Chat
-Message.belongsTo(Chat);
-Chat.hasMany(Message);
-
-// A Message can optionally be part of a Group
-Message.belongsTo(Group);
-Group.hasMany(Message);
-
-module.exports = {
-  User,
-  Message,
-  Chat,
-  Group
-};
+// Export all models
+module.exports = models;

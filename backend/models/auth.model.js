@@ -1,5 +1,4 @@
-const { storage } = require('../config/database');
-const { DataTypes } = require('sequelize');
+const { storage, DataTypes } = require('../config/database');
 
 /**
  * Represents the Auth model.

@@ -5,6 +5,9 @@ const cors = require("cors");
 const bodyParser = require('body-parser');
 const auth = require('./routes/auth.route');
 const user = require('./routes/user.route');
+const group = require('./routes/group.route');
+const message = require('./routes/message.route');
+const chat = require('./routes/chat.route');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 require("dotenv").config();
@@ -67,6 +70,9 @@ app.get("/", (req, res) => {
 
 app.use('/user', user);
 app.use('/auth', auth);
+app.use('/group', group);
+app.use('/message', message);
+app.use('/chat', chat);
 
 app.use((req, res) => {
     res.status(404).json({
