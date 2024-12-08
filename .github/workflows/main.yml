@@ -65,26 +65,50 @@ jobs:
           chmod 600 private_key
 
           # Sync the backend code to the server
-          # rsync -avz -e "ssh -i private_key" ./backend/ $SERVER_USER@$SERVER_HOST:~/iGotha/backend
+          rsync -avz -e "ssh -i private_key" ./backend/ $SERVER_USER@$SERVER_HOST:~/iGotha/backend
 
           # SSH into the server to pull changes, run migrations, and restart the service
           ssh -i private_key $SERVER_USER@$SERVER_HOST << 'EOF'
             cd ~/iGotha/backend
 
             # Pull the latest code (in case rsync is not used)
-            # git pull origin main
+            git pull origin main
 
             # Install dependencies on the server
-            pwd
             npm install
-            pwd
 
-            # Run database migrations
-            npm run migrate
+      - name: Run Database Migrations
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+        run: |
+          if ! npx sequelize-cli db:migrate; then
+            echo "Migration failed. Rolling back..."
+            npx sequelize-cli db:migrate:undo:all
+            exit 1
+          fi
 
-            # Restart the application using PM2
-            # pm2 restart server
+          # Restart the application using PM2
+          pm2 restart server
           EOF
 
           # Clean up the private key
           rm private_key
+
+      # Container and Orchestration Skipped for now.
+      # - name: Build Docker Image
+      #   run: |
+      #     # Build Docker Image:
+      #     docker build -t iGotha:latest .
+
+      # - name: Push Image to Docker Hub
+      #   run: |
+      #     # Push to Container Registry:
+      #     docker push ${{ secrets.DOCKER_USER_NAME }}/iGotha:latest
+
+      # - name: Deploy to Kubernetes
+      #   run: |
+      #     # Deploy to Kubernetes:
+      #     docker push ${{ secrets.DOCKER_USER_NAME }}/iGotha:latest
