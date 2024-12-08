@@ -76,8 +76,8 @@ jobs:
 
             # Install dependencies on the server
             pwd
-            # npm install
-            ./install_dependencies.sh
+            npm install --prefix ~/iGotha/backend/
+            # Check later
             pwd
 
             # Run database migrations
