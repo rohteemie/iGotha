@@ -1,7 +1,7 @@
 const path = process.env.NODE_ENV === "test" ? ".env.test" : ".env";
 require("dotenv").config({ path }); // Load environment variables based on environment
 
-const { Sequelize, DataTypes } = require("sequelize");
+const { Sequelize, DataTypes, Model, Optional } = require("sequelize");
 
 // Logging configuration (only log queries in development mode)
 const logging = process.env.NODE_ENV === "development" ? console.log : false;
@@ -41,4 +41,4 @@ const storage = new Sequelize(
   }
 })();
 
-module.exports = { storage, DataTypes };
+module.exports = { storage, DataTypes, Model, Optional };

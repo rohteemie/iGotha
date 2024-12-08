@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "NODE_ENV=test jest",
-    "migrate": "sequelize db:migrate"
+    "migrate": "sequelize db:migrate",
+    "build": "tsc",
+    "start": "node ./dist/server.js",
+    "dev": "ts-node ./server.ts"
   },
   "repository": {
     "type": "git",
@@ -37,6 +40,9 @@
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
-    "jest": "^29.7.0"
+    "@types/node": "^22.10.1",
+    "jest": "^29.7.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
   }
 }
