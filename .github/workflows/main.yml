@@ -72,7 +72,8 @@ jobs:
             cd ~/iGotha/backend
 
             # Pull the latest code (in case rsync is not used)
-            # git pull origin main
+            git pull origin main
+            pwd
 
             # Install dependencies on the server
             # npm install
