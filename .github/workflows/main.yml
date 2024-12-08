@@ -73,10 +73,10 @@ jobs:
 
             # Pull the latest code (in case rsync is not used)
             git pull origin main
-            pwd
 
             # Install dependencies on the server
-            # npm install
+            npm install
+            pwd
 
             # Run database migrations
             # npm run migrate
