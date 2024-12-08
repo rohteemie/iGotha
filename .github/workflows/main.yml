@@ -76,7 +76,8 @@ jobs:
 
             # Install dependencies on the server
             pwd
-            npm install
+            # npm install
+            ./install_dependencies.sh
             pwd
 
             # Run database migrations
