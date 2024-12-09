@@ -55,7 +55,7 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy to Server and Run Migrations
+      - name: Deploy to Server
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SERVER_USER: ${{ secrets.SERVER_USER }}
@@ -65,10 +65,10 @@ jobs:
           chmod 600 private_key
 
           # Sync the backend code to the server
-          rsync -avz -e "ssh -i private_key" ./backend/ $SERVER_USER@$SERVER_HOST:~/iGotha/backend
+          # rsync -avz -e "ssh -i private_key" ./backend $SERVER_USER@$SERVER_HOST:~/iGotha/backend
 
           # Run database migrations
-          ssh -i private_key $SERVER_USER@$SERVER_HOST "cd ~/iGotha/backend && npm run migrate"
+          # ssh -i private_key $SERVER_USER@$SERVER_HOST "cd ~/iGotha/backend && npm run migrate"
 
             # Pull the latest code (in case rsync is not used)
             git pull origin main
@@ -83,6 +83,8 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: ${{ secrets.DB_NAME }}
         run: |
+          git pull origin main
+          ssh -i private_key $SERVER_USER@$SERVER_HOST "cd ~/iGotha/backend
           if ! npx sequelize-cli db:migrate; then
             echo "Migration failed. Rolling back..."
             npx sequelize-cli db:migrate:undo:all
