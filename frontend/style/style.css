@@ -1,0 +1,8 @@
+#navbarNav {
+	align-items: right;
+}
+
+.navbar-collapse {
+    flex-grow: 0;
+    /* align-items: center; */
+}
