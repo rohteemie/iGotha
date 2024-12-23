@@ -5,10 +5,13 @@ const { verifyToken, hashData } = require('../helper/auth.util');
 const randomUser = require('../helper/user.util');
 
 async function doesUserExist(email) {
-  const userExist = await User.findOne({ where: { email } });
-  const authExist = await Auth.findOne({ where: { email } });
-  return userExist || authExist || null;
+  const user = await User.findOne({
+    where: { email },
+    include: [{ model: Auth, required: false }], // Join with Auth table
+  });
+  return user || null;
 }
+
 
 async function registerUser(req, res) {
   console.log('Request Body:', req.body);
