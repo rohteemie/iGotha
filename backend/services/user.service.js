@@ -1,17 +1,14 @@
 const { Auth } = require('../models/auth.model');
-
 const { User } = require('../models/associations.model');
 const { verifyToken, hashData } = require('../helper/auth.util');
 const randomUser = require('../helper/user.util');
+const { redis_client } = require('../config/redis.config');
 
 async function doesUserExist(email) {
-  const user = await User.findOne({
-    where: { email },
-    include: [{ model: Auth, required: false }], // Join with Auth table
-  });
-  return user || null;
+  const userExist = await User.findOne({ where: { email } });
+  const authExist = await Auth.findOne({ where: { email } });
+  return userExist || authExist || null;
 }
-
 
 async function registerUser(req, res) {
   console.log('Request Body:', req.body);
@@ -33,8 +30,14 @@ async function registerUser(req, res) {
       return res.status(201).json({ message: 'Guest User created successfully' });
     }
 
-    if (!userDetails.email || !userDetails.password) {
-      return res.status(400).json({ message: 'Email or Password is missing' });
+    // Check for required fields
+    const requiredFields = ['email', 'password', 'username', 'first_name', 'last_name'];
+    const missingFields = requiredFields.filter((field) => !userDetails[field]);
+
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        message: `Missing required fields: ${missingFields.join(', ')}`,
+      });
     }
 
     if (await doesUserExist(userDetails.email)) {
@@ -54,10 +57,23 @@ async function registerUser(req, res) {
   }
 }
 
+
 async function getUserName(req, res) {
   const { username } = req.params;
 
   try {
+    // Check cache
+    const cachedUser = await new Promise((resolve, reject) => {
+      redis_client.get(username, (err, data) => {
+        if (err) reject(err);
+        resolve(data ? JSON.parse(data) : null);
+      });
+    });
+
+    if (cachedUser) {
+      return res.status(200).json(cachedUser);
+    }
+
     const userDetails = await User.findOne({ where: { username } });
     if (!userDetails) {
       return res.status(404).json({ message: 'User not found' });
@@ -69,15 +85,15 @@ async function getUserName(req, res) {
     }
 
     const auth = verifyToken(req.headers['authorization']);
-    if (!auth) {
+    if (!auth || auth !== authDetails.id) {
       return res.status(401).json({ message: 'Unauthorized request' });
     }
 
-    if (auth === authDetails.id) {
-      return res.status(200).json(userDetails);
-    } else {
-      return res.status(401).json({ message: 'Invalid token' });
-    }
+    // Cache result
+    const userDataToCache = { ...userDetails.toJSON(), auth: authDetails.toJSON() };
+    redis_client.setex(username, 3600, JSON.stringify(userDataToCache)); // Cache for 1 hour
+
+    return res.status(200).json(userDataToCache);
   } catch (error) {
     console.error('Error fetching user:', error);
     return res.status(500).json({ message: 'Internal server error' });
@@ -110,17 +126,32 @@ async function updateUser(req, res) {
     }
 
     const authInfo = await Auth.findOne({ where: { email: user.email } });
-    if (getUserId === authInfo.id) {
-      await User.update(updatedData, { where: { username } });
-      return res.status(200).json({ message: 'User updated successfully' });
-    } else {
+    if (!authInfo) {
+      return res.status(404).json({ message: 'Auth details not found' });
+    }
+
+    if (getUserId !== authInfo.id) {
       return res.status(401).json({ message: 'Unauthorized request' });
     }
+
+    // Validate updatedData to ensure key fields are not left out
+    const requiredFields = ['first_name', 'last_name', 'email', 'username'];
+    const missingFields = requiredFields.filter((field) => !updatedData[field] && !user[field]);
+
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        message: `Missing required fields: ${missingFields.join(', ')}`,
+      });
+    }
+
+    await User.update(updatedData, { where: { username } });
+    return res.status(200).json({ message: 'User updated successfully' });
   } catch (error) {
     console.error('Error updating user:', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
 }
+
 
 module.exports = {
   registerUser,

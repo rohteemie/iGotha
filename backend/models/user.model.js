@@ -24,6 +24,7 @@ module.exports = (storage, DataTypes) => {
         username: {
           type: DataTypes.STRING,
           allowNull: false,
+          unique: true,
           validate: {
             notEmpty: { msg: 'Username cannot be empty' },
           },
