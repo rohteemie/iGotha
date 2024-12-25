@@ -26,8 +26,11 @@ async function registerUser(req, res) {
         email: null,
       };
 
-      await User.create(guestUser);
-      return res.status(201).json({ message: 'Guest User created successfully' });
+      const guest_user = await User.create(guestUser);
+      return res.status(201).json({
+        message: 'Guest User created successfully',
+        user: guest_user.toJSON(),
+       });
     }
 
     // Check for required fields
