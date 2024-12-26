@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.IO Test</title>
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>Socket.IO Test</h1>
+    <script>
+        const socket = io('http://localhost:3000'); // Replace with your server URL
+
+        // Emit an event to the server
+        socket.emit('test-event', { data: 'Hello Server' });
+
+        // Listen for a response from the server
+        socket.on('privateMessage', (data) => {
+            console.log('Received from server:', data);
+        });
+
+        // Log connection status
+        socket.on('connect', () => {
+            console.log('Connected to server!!!!!');
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from server');
+        });
+    </script>
+</body>
+</html>
