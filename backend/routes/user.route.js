@@ -83,21 +83,29 @@ router.get('/', user_service.getAllUsers);
  * @param {function} user_service.registerUser - Controller function to register a new user.
  */
 router.post('/create', createAccountLimiter, (req, res) => {
-  const { email, password } = req.body;
+	const { email, password } = req.body;
 
-  const emailValidation = validate.my_email(email);
-  if (emailValidation !== true) {
-    return res.status(400).json({ message: emailValidation });
-  }
+	// Check if it's a guest user request (email and password are not provided)
+	if (!email && !password) {
+	  // Directly call the registerUser function for guest user creation
+	  return user_service.registerUser(req, res);
+	}
 
-  const passwordValidation = validate.my_password(password);
-  if (passwordValidation !== true) {
-    return res.status(400).json({ message: passwordValidation });
-  }
+	// Perform email and password validation for non-guest users
+	const emailValidation = validate.my_email(email);
+	if (emailValidation !== true) {
+	  return res.status(400).json({ message: emailValidation });
+	}
 
+	const passwordValidation = validate.my_password(password);
+	if (passwordValidation !== true) {
+	  return res.status(400).json({ message: passwordValidation });
+	}
 
-  user_service.registerUser(req, res);
-});
+	// Proceed with user registration
+	user_service.registerUser(req, res);
+  });
+
 
 /**
  * @name /:username
