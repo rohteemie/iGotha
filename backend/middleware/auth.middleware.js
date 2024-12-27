@@ -26,6 +26,9 @@ function authenticateToken(req, res, next) {
     req.user = { id: decodedUserId };
     next();
   } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Token expired, use refresh token' });
+    }
     return res.status(403).json({ message: error.message });
   }
 }
