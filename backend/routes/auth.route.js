@@ -5,9 +5,10 @@
  */
 
 const router = require('express').Router();
-const auth = require('../services/auth.service');
+const auth_service = require('../services/auth.service');
 
-router.post('/login', auth.login);
-// router.get('/', auth.getAllAuthInfo);
+router.post('/login', auth_service.login);
+router.post('/refresh_token', auth_service.refreshAccessToken);
+// router.get('/', auth_service.getAllAuthInfo);
 
 module.exports = router;

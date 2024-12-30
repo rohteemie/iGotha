@@ -58,6 +58,7 @@ function generateJWT(id) {
   }
 }
 
+
 /**
  * Verifies the authenticity of a JSON Web Token (JWT).
  * @param {string} token - The JWT to be verified.
@@ -67,27 +68,21 @@ function verifyToken(token) {
 
   if (!secretKey) {
     console.error('Secret key is missing');
-    return { message: 'Internal server error: Missing secret key' };
+    throw new Error('Internal server error: Missing secret key');
   }
 
   if (!token) {
-    return { message: 'Token not provided' };
+    throw new Error('Token not provided');
   }
 
   try {
     const decodedToken = jwt.verify(token, secretKey);
-
-    const decodedUserId = decodedToken.id;
-    return decodedUserId;
-
+    return decodedToken.id; // Return user ID
   } catch (err) {
     console.error('Error verifying token:', err.message);
-
-    // Return a standardized error response
-    return { message: 'Token Expired or not valid' };
+    throw new Error('Invalid or expired token'); // Throw error instead of returning
   }
 }
-
 
 
 
