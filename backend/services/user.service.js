@@ -87,11 +87,6 @@ async function getUserName(req, res) {
       return res.status(404).json({ message: 'Auth details not found' });
     }
 
-    const auth = verifyToken(req.headers['authorization']);
-    if (!auth || auth !== authDetails.id) {
-      return res.status(401).json({ message: 'Unauthorized request' });
-    }
-
     // Cache result
     const userDataToCache = { ...userDetails.toJSON(), auth: authDetails.toJSON() };
     redis_client.setex(username, 3600, JSON.stringify(userDataToCache)); // Cache for 1 hour
