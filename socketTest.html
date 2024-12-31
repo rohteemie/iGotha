@@ -1,32 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Socket.IO Test</title>
     <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Socket.IO Test</h1>
     <script>
-        const socket = io('http://localhost:3000'); // Replace with your server URL
+      // Helper function to retrieve a cookie by name
+      function getCookie(name) {
+        const cookies = document.cookie.split("; ");
+        for (const cookie of cookies) {
+          const [key, value] = cookie.split("=");
+          if (key === name) {
+            return value;
+          }
+        }
+        return null;
+      }
 
-        // Emit an event to the server
-        socket.emit('test-event', { data: 'Hello Server' });
+      // Retrieve the 'atkn' token from the cookie
+      const token = getCookie("atkn");
 
-        // Listen for a response from the server
-        socket.on('privateMessage', (data) => {
-            console.log('Received from server:', data);
-        });
+      const socket = io("http://localhost:3000", {
+        auth: {
+          token: token,
+        },
+      }); // Replace with your server URL
 
-        // Log connection status
-        socket.on('connect', () => {
-            console.log('Connected to server!!!!!');
-        });
+      // Emit an event to the server
+      socket.emit("test-event", { data: "Hello Server" });
 
-        socket.on('disconnect', () => {
-            console.log('Disconnected from server');
-        });
+      // Listen for a response from the server
+      socket.on("privateMessage", (data) => {
+        console.log("Received from server:", data);
+      });
+
+      // Log connection status
+      socket.on("connect", () => {
+        console.log("Connected to server!!!!!");
+      });
+
+      socket.on("disconnect", () => {
+        console.log("Disconnected from server");
+      });
     </script>
-</body>
+  </body>
 </html>
