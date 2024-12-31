@@ -13,7 +13,7 @@ async function deliverOfflineMessage(io, socket, userID) {
     if (messages.length > 0) {
       messages.forEach((msg) => {
         const parsedMessage = JSON.parse(msg);
-        socket.emit("privateMessage", {
+        socket.emit("offlinePrivateMessage", {
           recipientId: userID,
           message: parsedMessage,
         });
