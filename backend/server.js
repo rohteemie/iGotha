@@ -5,6 +5,7 @@ const { storage } = require('./config/database');
 // require('./models/associations.model');
 const { setupSocketHandlers } = require('./websocket/socketHandler');
 const app = require('./app');
+const websocketAuthenticateTokenMiddleware = require('./middleware/auth.socket.middleware');
 
 
 const server = http.createServer(app);
@@ -14,6 +15,9 @@ const io = new Server(server, {
     methods: ['GET', 'POST']
   }
 });
+
+// plug in middlewares
+websocketAuthenticateTokenMiddleware(io)
 
 // plug in SocketIO handler
 setupSocketHandlers(io);
