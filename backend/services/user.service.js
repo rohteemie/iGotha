@@ -1,9 +1,9 @@
+const { Op } = require('sequelize');
 const { Auth } = require('../models/auth.model');
 const { User } = require('../models/associations.model');
 const { verifyToken, hashData } = require('../helper/auth.util');
 const randomUser = require('../helper/user.util');
-const { redis_client } = require('../config/redis.config');
-const { Op } = require('sequelize');
+const redisUtil = require('../helper/redis.util');
 
 async function doesUserExist(email, username) {
   const user = await User.findOne({
@@ -20,6 +20,7 @@ async function doesUserExist(email, username) {
 }
 
 async function registerUser(req, res) {
+  console.log('Request Body:', req.body);
   const userDetails = req.body;
 
   try {
@@ -73,10 +74,11 @@ async function getUsername(req, res) {
   const { username } = req.params;
 
   try {
-    await connect_redis();
+    // await connect_redis();
 
     // Check cache
-    const cachedUser = await redis_client.get(username);
+    const cachedUser = await redisUtil.get(username);
+    console.log('Cached User:', cachedUser);
 
     if (cachedUser) {
       return res.status(200).json(JSON.parse(cachedUser));
@@ -92,9 +94,9 @@ async function getUsername(req, res) {
       return res.status(404).json({ message: 'Auth details not found' });
     }
 
-    // Cache result
+    // Cache the result
     const userDataToCache = { ...userDetails.toJSON(), auth: authDetails.toJSON() };
-    await redis_client.setEx(username, 3600, JSON.stringify(userDataToCache)); // Cache for 1 hour
+    await redisUtil.set(key = username, value = JSON.stringify(userDataToCache)); // Cache for 1 hour
 
     return res.status(200).json(userDataToCache);
   } catch (error) {
