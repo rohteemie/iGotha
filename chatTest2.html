@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ChatGPT-like Chat</title>
+    <title>iGotha Chat Testing Page 1</title>
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <style>
       body {
@@ -200,6 +200,15 @@
       socket.on("privateMessage", ({ sender, message }) => {
         displayMessage(message, "private");
       });
+      
+        
+      socket.on("offlinePrivateMessage", ({ sender, message }) => {
+        console.log(message);
+        console.log('received an offline message!');
+        console.log(typeof(message));
+        console.log(message.length)
+        displayMessageReceivedWhenOffline(message, "private")
+      });
 
       // Send message
       function sendMessage() {
@@ -235,6 +244,24 @@
 
         const textElement = document.createElement("p"); // Create a separate element for the message text
         textElement.textContent = message;
+        textElement.style.marginBottom = "20px"; // Add margin to separate text from time
+        messageElement.appendChild(textElement);
+
+        const timeElement = document.createElement("span"); // Use <span> for the time
+        timeElement.classList.add("time");
+        timeElement.textContent = formatTime(new Date());
+        messageElement.appendChild(timeElement);
+
+        messagesContainer.appendChild(messageElement);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+
+      function displayMessageReceivedWhenOffline(message, type) {
+        const messageElement = document.createElement("div");
+        messageElement.classList.add("message", type);
+
+        const textElement = document.createElement("p"); // Create a separate element for the message text
+        textElement.textContent = message.message;
         textElement.style.marginBottom = "20px"; // Add margin to separate text from time
         messageElement.appendChild(textElement);
 
