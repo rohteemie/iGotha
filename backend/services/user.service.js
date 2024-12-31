@@ -2,16 +2,24 @@ const { Auth } = require('../models/auth.model');
 const { User } = require('../models/associations.model');
 const { verifyToken, hashData } = require('../helper/auth.util');
 const randomUser = require('../helper/user.util');
-const { redis_client, connect_redis } = require('../config/redis.config');
+const { redis_client } = require('../config/redis.config');
+const { Op } = require('sequelize');
 
-async function doesUserExist(email) {
-  const userExist = await User.findOne({ where: { email } });
-  const authExist = await Auth.findOne({ where: { email } });
-  return userExist || authExist || null;
+async function doesUserExist(email, username) {
+  const user = await User.findOne({
+    where: {
+      [Op.or]: [{ email }, { username }],
+    },
+  });
+  const auth = await Auth.findOne({
+    where: {
+      [Op.or]: [{ email }],
+    },
+  });
+  return user || auth || null;
 }
 
 async function registerUser(req, res) {
-  console.log('Request Body:', req.body);
   const userDetails = req.body;
 
   try {
@@ -43,7 +51,7 @@ async function registerUser(req, res) {
       });
     }
 
-    if (await doesUserExist(userDetails.email)) {
+    if (await doesUserExist(userDetails.email, userDetails.username)) {
       return res.status(403).json({ message: 'User already exists' });
     }
 
@@ -61,7 +69,7 @@ async function registerUser(req, res) {
 }
 
 
-async function getUserName(req, res) {
+async function getUsername(req, res) {
   const { username } = req.params;
 
   try {
@@ -84,7 +92,7 @@ async function getUserName(req, res) {
       return res.status(404).json({ message: 'Auth details not found' });
     }
 
-    // Cache the result
+    // Cache result
     const userDataToCache = { ...userDetails.toJSON(), auth: authDetails.toJSON() };
     await redis_client.setEx(username, 3600, JSON.stringify(userDataToCache)); // Cache for 1 hour
 
@@ -151,7 +159,7 @@ async function updateUser(req, res) {
 
 module.exports = {
   registerUser,
-  getUserName,
+  getUsername,
   getAllUsers,
   updateUser,
 };

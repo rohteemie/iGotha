@@ -1,6 +1,5 @@
 const path = process.env.NODE_ENV === "test" ? ".env.test" : ".env";
-require("dotenv").config({ path }); // Load environment variables based on environment
-
+require("dotenv").config({ path });
 const { Sequelize, DataTypes } = require("sequelize");
 
 // Logging configuration (only log queries in development mode)
@@ -13,32 +12,31 @@ const logging = process.env.NODE_ENV === "development" ? console.log : false;
  * @type {Sequelize}
  */
 const storage = new Sequelize(
-  process.env.DB,                // Database name
-  process.env.DB_USER,           // Database username
-  process.env.DB_PASSWORD,       // Database password
+  process.env.DB,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
   {
-    host: process.env.DB_HOST,   // Database host
-    dialect: process.env.DB_DIALECT || "mysql", // Fallback to MySQL if dialect is not provided
-    logging,                     // Log queries only in development
+    host: process.env.DB_HOST,
+    dialect: process.env.DB_DIALECT || "mysql",
+    logging,
     dialectOptions: {
-      // Enable SSL support for production (if required by your DB provider)
       ssl: process.env.DB_SSL === "true" ? { require: true, rejectUnauthorized: false } : undefined,
     },
     define: {
-      timestamps: true,          // Automatically adds `createdAt` and `updatedAt`
-      underscored: true,         // Use snake_case column names instead of camelCase
+      timestamps: true,
+      underscored: true,
     },
   }
 );
 
 // Test database connection and provide feedback
-(async () => {
-  try {
-    await storage.authenticate();
-    console.log("Database connection established successfully.");
-  } catch (error) {
-    console.error("Unable to connect to the database:", error);
-  }
-})();
+// (async () => {
+//   try {
+//     await storage.authenticate();
+//     console.log("Database connection established successfully.");
+//   } catch (error) {
+//     console.error("Unable to connect to the database:", error);
+//   }
+// })();
 
 module.exports = { storage, DataTypes };
