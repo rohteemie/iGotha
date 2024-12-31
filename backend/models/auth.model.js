@@ -30,11 +30,6 @@ const Auth = storage.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    // userId: {
-    //   type: DataTypes.STRING,
-    //   allowNull: false,
-    //   unique: true,
-    // },
     failed_login_count: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -49,6 +44,10 @@ const Auth = storage.define(
       type: DataTypes.DATE,
       allowNull: true,
       defaultValue: null,
+    },
+    refresh_token: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
   },
 );

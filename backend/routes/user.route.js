@@ -9,6 +9,7 @@ const router = express.Router();
 const user_service = require('../services/user.service');
 const rateLimit = require('express-rate-limit');
 const validate = require('../helper/validate');
+const { authenticateToken } = require('../middleware/auth.middleware');
 
 
 /**
@@ -114,7 +115,7 @@ router.post('/create', createAccountLimiter, (req, res) => {
  * @inner
  * @param {function} user_service.getUserName - Controller function to get a user by username.
  */
-router.get('/:username', user_service.getUserName);
+router.get('/:username', authenticateToken, user_service.getUserName);
 
 /**
  * @name /:username
@@ -124,7 +125,7 @@ router.get('/:username', user_service.getUserName);
  * @inner
  * @param {function} user_service.updateUser - Controller function to update a user by username.
  */
-router.put('/:username', user_service.updateUser);
+router.put('/:username', authenticateToken, user_service.updateUser);
 
 
 module.exports = router;
