@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChatGPT-like Chat</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+      body {
+        margin-right: 5%;
+        margin-left: 5%;
+        bottom: 0;
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        background-color: #ece5dd;
+      }
+
+      .chat-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        flex-grow: 1;
+        padding: 10px;
+        overflow: hidden;
+      }
+
+      .messages {
+        overflow-y: auto;
+        flex-grow: 1;
+        margin-bottom: 10px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .message {
+        padding: 10px;
+        border-radius: 7.5px;
+        margin: 5px 0;
+        max-width: 60%;
+        word-wrap: break-word;
+        position: relative;
+        min-width: 120px; /* Ensures enough space for short text and timestamp */
+        display: flex; /* Allows better alignment of text and time */
+        flex-direction: column;
+      }
+
+      .message.sent {
+        background-color: #dcf8c6;
+        align-self: flex-end;
+      }
+
+      .message.received {
+        background-color: #ffffff;
+        align-self: flex-start;
+      }
+
+      .message.private {
+        background-color: #fce4ec;
+        align-self: flex-start;
+      }
+
+      .message .time {
+        font-size: 0.75em;
+        color: #999;
+        position: absolute;
+        bottom: 5px;
+        right: 10px;
+      }
+
+      .input-container {
+        display: flex;
+        gap: 10px;
+        padding: 10px;
+        background-color: #ffffff;
+      }
+
+      .input-container input {
+        flex-grow: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 20px;
+        outline: none;
+      }
+
+      .input-container button {
+        padding: 10px 20px;
+        border: none;
+        background-color: #075e54;
+        color: white;
+        border-radius: 20px;
+        cursor: pointer;
+      }
+
+      .input-container button:disabled {
+        background-color: #ccc;
+      }
+
+      .input-container textarea {
+        flex-grow: 1;
+        padding: 7px;
+        padding-top: 17px;
+        margin: 3px;
+        border: 1px solid #ccc;
+        border-radius: 20px;
+        outline: none;
+        resize: none; /* Prevent manual resizing */
+        overflow: hidden; /* Ensures the content stays inside the textarea */
+        max-height: 80px; /* Optional: Limit maximum height */
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      function getCookie(name) {
+        const cookies = document.cookie.split("; ");
+        for (const cookie of cookies) {
+          const [key, value] = cookie.split("=");
+          if (key === name) {
+            return value;
+          }
+        }
+        return null;
+      }
+
+      function formatTime(date) {
+        return date.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+    </script>
+
+    <div class="chat-container">
+      <div class="messages" id="messages"></div>
+      <div class="input-container">
+        <textarea id="messageInput" placeholder="Type a message..."></textarea>
+        <button id="sendButton">Send</button>
+      </div>
+    </div>
+
+    <script>
+      const token = getCookie("atkn");
+
+      const socket = io("http://localhost:3000", {
+        auth: {
+          token: token,
+        },
+      });
+      const messageInput = document.getElementById("messageInput");
+      const MAX_HEIGHT = 80; // Set the maximum height in pixels
+
+      // Auto-resize the textarea based on content
+      messageInput.addEventListener("input", () => {
+        messageInput.style.height = "auto"; // Reset height to auto to calculate correct scrollHeight
+
+        // Calculate the new height and apply the maximum if exceeded
+        const newHeight = messageInput.scrollHeight;
+        messageInput.style.height = Math.min(newHeight, MAX_HEIGHT) + "px";
+
+        // Add or remove scrolling if content exceeds maximum height
+        messageInput.style.overflowY =
+          newHeight > MAX_HEIGHT ? "scroll" : "hidden";
+      });
+
+      const sendButton = document.getElementById("sendButton");
+      const messagesContainer = document.getElementById("messages");
+      const recipientId = "f983f451-ada5-455d-ba96-3b1ee3fde61d";
+
+      let messageQueue = [];
+
+      // Handle connection
+      socket.on("connect", () => {
+        console.log("Connected to the server");
+        sendButton.disabled = false;
+
+        // Emit queued messages
+        while (messageQueue.length > 0) {
+          const message = messageQueue.shift();
+          socket.emit("privateMessage", {
+            recipientId: recipientId,
+            message: message,
+          });
+        }
+      });
+
+      // Handle disconnection
+      socket.on("disconnect", () => {
+        console.log("Disconnected from the server");
+        sendButton.disabled = true;
+      });
+
+      // Listen for incoming messages
+      socket.on("PrivateMessage", (message) => {
+        displayMessage(message, "received");
+      });
+
+      // Listen for private messages
+      socket.on("privateMessage", ({ sender, message }) => {
+        displayMessage(message, "private");
+      });
+
+      // Send message
+      function sendMessage() {
+        const message = messageInput.value.trim();
+        if (message) {
+          if (socket.connected) {
+            socket.emit("privateMessage", {
+              recipientId: recipientId,
+              message: message,
+            });
+          } else {
+            messageQueue.push(message);
+          }
+          displayMessage(message, "sent");
+          messageInput.value = "";
+        }
+      }
+
+      sendButton.addEventListener("click", sendMessage);
+
+      // Send message on pressing Enter
+      messageInput.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") {
+          sendMessage();
+          messageInput.style.height = 'auto';
+        }
+      });
+
+      // Display message in the chat
+      function displayMessage(message, type) {
+        const messageElement = document.createElement("div");
+        messageElement.classList.add("message", type);
+
+        const textElement = document.createElement("p"); // Create a separate element for the message text
+        textElement.textContent = message;
+        textElement.style.marginBottom = "20px"; // Add margin to separate text from time
+        messageElement.appendChild(textElement);
+
+        const timeElement = document.createElement("span"); // Use <span> for the time
+        timeElement.classList.add("time");
+        timeElement.textContent = formatTime(new Date());
+        messageElement.appendChild(timeElement);
+
+        messagesContainer.appendChild(messageElement);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+    </script>
+  </body>
+</html>
