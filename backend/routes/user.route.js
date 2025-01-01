@@ -44,7 +44,7 @@ const { authenticateToken } = require('../middleware/auth.middleware');
 	* @description Route to get a user by username.
 	* @memberof module:routes/user
 	* @inner
-	* @param {function} user_service.getUserName - Controller function to get a user by username.
+	* @param {function} user_service.getUsername - Controller function to get a user by username.
 	*/
 
  /**
@@ -113,9 +113,9 @@ router.post('/create', createAccountLimiter, (req, res) => {
  * @description Route to get a user by username.
  * @memberof module:routes/user
  * @inner
- * @param {function} user_service.getUserName - Controller function to get a user by username.
+ * @param {function} user_service.getUsername - Controller function to get a user by username.
  */
-router.get('/:username', authenticateToken, user_service.getUserName);
+router.get('/:username', authenticateToken, user_service.getUsername);
 
 /**
  * @name /:username
