@@ -30,7 +30,7 @@ function setupSocketHandlers(io) {
         userID
       );
       redis_client.del(`${userID}`);
-      console.log("deleted user");
+      console.log(`\n\ndeleted user ${userID}\n\n`);
     });
   });
 }
