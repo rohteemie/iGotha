@@ -74,11 +74,8 @@ async function getUsername(req, res) {
   const { username } = req.params;
 
   try {
-    // await connect_redis();
-
     // Check cache
     const cachedUser = await redisUtil.get(username);
-    console.log('Cached User:', cachedUser);
 
     if (cachedUser) {
       return res.status(200).json(JSON.parse(cachedUser));

@@ -23,7 +23,7 @@ function authenticateToken(req, res, next) {
     }
 
     const decodedUserId = verifyToken(token);
-    req.user = { id: decodedUserId };
+    req.user = { id: decodedUserId.id, username: decodedUserId.username };
     next();
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
@@ -33,6 +33,14 @@ function authenticateToken(req, res, next) {
   }
 }
 
+function validateUserOwnership(req, res, next) {
+  const { username } = req.params;
+
+  if (req.user.username !== username) {
+    return res.status(403).json({ message: 'You do not have access to this resource' });
+  }
+  next();
+}
 
 function authorizeRoles(...allowedRoles) {
 	return (req, res, next) => {
@@ -68,5 +76,6 @@ module.exports = {
 	authenticateToken,
 	authorizeRoles,
 	checkTokenExpiry,
-	checkIP
+	checkIP,
+  validateUserOwnership
  };
