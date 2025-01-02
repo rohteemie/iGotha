@@ -6,7 +6,6 @@ const {
    generateJWT,
 } = require('../helper/auth.util');
 const { v4: uuidv4 } = require('uuid');
-const jwt = require('jsonwebtoken');
 
 /**
  * Handles user login by verifying credentials and generating a JWT token.
@@ -25,74 +24,64 @@ const jwt = require('jsonwebtoken');
 async function login(req, res) {
     const { email, password } = req.body;
     if (!email || !password) {
-        return res.status(400).json({message: 'No email or password given!'})
+        return res.status(400).json({ message: 'Email and password are required!' });
     }
 
     try {
-        await storage.sync();
-
         const user = await Auth.findOne({ where: { email } });
         if (!user) {
-            return res.status(401).json({ message: 'Wrong email' });
+            return res.status(401).json({ message: 'Invalid email or password!' });
         }
 
         if (user.failed_login_count >= 5 && user.account_locked) {
-            return res.status(403).json({ message: 'Account is locked, try again later!' });
+            return res.status(403).json({ message: 'Account is locked. Please try again later.' });
         }
 
         const passwordMatches = await compareHash(password, user.password);
         if (!passwordMatches) {
             const newFailedLoginCount = user.failed_login_count + 1;
-
-            await Auth.update({
-                failed_login_count: newFailedLoginCount,
-                account_locked: newFailedLoginCount >= 5 ? true : user.account_locked,
-                account_locked_date: newFailedLoginCount >= 5 ? new Date() : user.account_locked_date,
-            }, {
-                where: { email: user.email }
-            });
-            return res.status(401).json({ message: 'Wrong password' });
+            await Auth.update(
+                {
+                    failed_login_count: newFailedLoginCount,
+                    account_locked: newFailedLoginCount >= 5,
+                    account_locked_date: newFailedLoginCount >= 5 ? new Date() : null,
+                },
+                { where: { email } }
+            );
+            return res.status(401).json({ message: 'Invalid email or password!' });
         }
 
-        const accessToken = generateJWT(user.id);
-        const refreshToken = uuidv4();
-        const userData = await User.findOne({ where: { email } });
-
-        if (userData) {
-            await Auth.update({
-                failed_login_count: 0,
-                account_locked: false,
-                account_locked_date: null,
-                refresh_token: refreshToken,
-            }, {
-                where: { email: user.email }
-            });
-        }
-
-        await User.update({
-            last_seen: new Date()
-        }, {
-            where: { username: userData.username }
+        const userData = await User.findOne({
+            where: { email },
+            attributes: ['first_name', 'username', 'email']
         });
 
-        return res.status(200).json({ userData, accessToken, refreshToken });
+        // Reset failed login count and generate tokens
+        const accessToken = generateJWT(user.id, userData.username);
+        const refreshToken = uuidv4();
+        await Auth.update(
+            { failed_login_count: 0, account_locked: false, refresh_token: refreshToken },
+            { where: { email } }
+        );
+
+        if (userData) {
+            await User.update({ last_seen: new Date() }, { where: { email } });
+        }
+
+        return res.status(200).json({ user: userData, accessToken, refreshToken });
     } catch (error) {
         console.error('Error during login:', error);
-        return res.status(500).json({ message: 'Internal server error' });
+        return res.status(500).json({ message: 'Internal server error.' });
     }
 }
 
-
 async function getAllAuthInfo(req, res) {
     try {
-        await storage.sync();
-
-        const authInfo = await Auth.findAll();
-
-        return res.status(200).json(authInfo);
+        const authRecords = await Auth.findAll();
+        return res.status(200).json(authRecords);
     } catch (error) {
         console.error('Error fetching authentication info:', error);
-        return res.status(500).json({ message: 'Internal server error' });
+        return res.status(500).json({ message: 'Internal server error.' });
     }
 }
 
@@ -105,14 +94,15 @@ async function refreshAccessToken(req, res) {
 
   try {
     // Find the user with the provided refresh token
-    const user = await Auth.findOne({ where: { refresh_token: refreshToken } });
+    const authRecord = await Auth.findOne({ where: { refresh_token: refreshToken } });
+    const userRecord = await User.findOne({ where: { email } });
 
-    if (!user) {
+    if (!authRecord || !userRecord) {
       return res.status(403).json({ message: 'Invalid refresh token' });
     }
 
     // Generate a new access token
-    const newAccessToken = generateJWT(user.id);
+    const newAccessToken = generateJWT(authRecord.id, userRecord.username);
 
     return res.status(200).json({
       accessToken: newAccessToken,
