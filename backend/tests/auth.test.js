@@ -19,7 +19,7 @@ describe('Auth Model', () => {
   });
 
 
-  test('Should create all Auth model fields', async () => {
+  test('Create all Auth model fields', async () => {
     const email = 'testmail@testmail.com';
     const password = 'TestPass123@.';
 
@@ -46,7 +46,7 @@ describe('Auth Model', () => {
 
 
 
-  test('should generate a unique ID using UUID4', async () => {
+  test('Generate a unique ID to users using UUID4', async () => {
     const email = 'testmail@testmail.com';
     const password = 'TestPass123@.';
 
@@ -69,7 +69,7 @@ describe('Auth Model', () => {
   });
 
 
-  test(`Validate email and password field to check if it's valid`, async () => {
+  test(`Check if it's valid for email and password`, async () => {
     const email = 'testmail@testmail.com';
     const password = 'TestPass123@.';
 
