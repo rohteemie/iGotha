@@ -67,19 +67,20 @@ jobs:
           cd ~/iGotha/backend && ./runTest.sh
 
           # Pull the latest code (in case rsync is not used)
-          git pull origin main
+          # git pull origin main
 
           # Install dependencies on the server
-          npm install
+          # npm install
 
           # Run database migrations
           # npm run migrate
 
           # Restart the application using PM2
-          pm2 restart server EOF
+          pm2 restart server || pm2 start server --name server
+          EOF
 
           # Clean up the private key
-          # rm private_key
+          rm private_key
 
           # Clean up the known_hosts file
           # rm ~/.ssh/known_hosts

@@ -5,6 +5,7 @@ npm test
 if [ $? -eq 0 ]; then
   echo "Tests passed"
   git pull origin main
+  npm install
 else
   echo "Tests failed"
   echo "Not pulling latest code."
