@@ -8,6 +8,7 @@ const redis_client = createClient({
     reconnectStrategy: (retries) => Math.min(retries * 50, 2000), // Retry strategy
   },
   password: process.env.REDIS_PASSWORD || undefined, // Optional
+
 });
 
 // Handle connection events
