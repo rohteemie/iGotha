@@ -5,6 +5,8 @@ const {
    compareHash,
    generateJWT,
 } = require('../helper/auth.util');
+const { v4: uuidv4 } = require('uuid');
+const jwt = require('jsonwebtoken');
 
 /**
  * Handles user login by verifying credentials and generating a JWT token.
@@ -22,6 +24,9 @@ const {
  */
 async function login(req, res) {
     const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json({message: 'No email or password given!'})
+    }
 
     try {
         await storage.sync();
@@ -50,6 +55,7 @@ async function login(req, res) {
         }
 
         const accessToken = generateJWT(user.id);
+        const refreshToken = uuidv4();
         const userData = await User.findOne({ where: { email } });
 
         if (userData) {
@@ -57,6 +63,7 @@ async function login(req, res) {
                 failed_login_count: 0,
                 account_locked: false,
                 account_locked_date: null,
+                refresh_token: refreshToken,
             }, {
                 where: { email: user.email }
             });
@@ -68,7 +75,7 @@ async function login(req, res) {
             where: { username: userData.username }
         });
 
-        return res.status(200).json({ userData, accessToken });
+        return res.status(200).json({ userData, accessToken, refreshToken });
     } catch (error) {
         console.error('Error during login:', error);
         return res.status(500).json({ message: 'Internal server error' });
@@ -89,9 +96,36 @@ async function getAllAuthInfo(req, res) {
     }
 }
 
+async function refreshAccessToken(req, res) {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(401).json({ message: 'Refresh token is required' });
+  }
+
+  try {
+    // Find the user with the provided refresh token
+    const user = await Auth.findOne({ where: { refresh_token: refreshToken } });
+
+    if (!user) {
+      return res.status(403).json({ message: 'Invalid refresh token' });
+    }
+
+    // Generate a new access token
+    const newAccessToken = generateJWT(user.id);
+
+    return res.status(200).json({
+      accessToken: newAccessToken,
+    });
+  } catch (error) {
+    console.error('Error refreshing access token:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+}
 
 
 module.exports = {
     login,
-    getAllAuthInfo
+    getAllAuthInfo,
+    refreshAccessToken
 };

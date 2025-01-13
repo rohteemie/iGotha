@@ -9,6 +9,7 @@ const router = express.Router();
 const user_service = require('../services/user.service');
 const rateLimit = require('express-rate-limit');
 const validate = require('../helper/validate');
+const { authenticateToken } = require('../middleware/auth.middleware');
 
 
 /**
@@ -43,7 +44,7 @@ const validate = require('../helper/validate');
 	* @description Route to get a user by username.
 	* @memberof module:routes/user
 	* @inner
-	* @param {function} user_service.getUserName - Controller function to get a user by username.
+	* @param {function} user_service.getUsername - Controller function to get a user by username.
 	*/
 
  /**
@@ -82,21 +83,29 @@ router.get('/', user_service.getAllUsers);
  * @param {function} user_service.registerUser - Controller function to register a new user.
  */
 router.post('/create', createAccountLimiter, (req, res) => {
-  const { email, password } = req.body;
+	const { email, password } = req.body;
 
-  const emailValidation = validate.my_email(email);
-  if (emailValidation !== true) {
-    return res.status(400).json({ message: emailValidation });
-  }
+	// Check if it's a guest user request (email and password are not provided)
+	if (!email && !password) {
+	  // Directly call the registerUser function for guest user creation
+	  return user_service.registerUser(req, res);
+	}
 
-  const passwordValidation = validate.my_password(password);
-  if (passwordValidation !== true) {
-    return res.status(400).json({ message: passwordValidation });
-  }
+	// Perform email and password validation for non-guest users
+	const emailValidation = validate.my_email(email);
+	if (emailValidation !== true) {
+	  return res.status(400).json({ message: emailValidation });
+	}
 
+	const passwordValidation = validate.my_password(password);
+	if (passwordValidation !== true) {
+	  return res.status(400).json({ message: passwordValidation });
+	}
 
-  user_service.registerUser(req, res);
-});
+	// Proceed with user registration
+	user_service.registerUser(req, res);
+  });
+
 
 /**
  * @name /:username
@@ -104,9 +113,9 @@ router.post('/create', createAccountLimiter, (req, res) => {
  * @description Route to get a user by username.
  * @memberof module:routes/user
  * @inner
- * @param {function} user_service.getUserName - Controller function to get a user by username.
+ * @param {function} user_service.getUsername - Controller function to get a user by username.
  */
-router.get('/:username', user_service.getUserName);
+router.get('/:username', authenticateToken, user_service.getUsername);
 
 /**
  * @name /:username
@@ -116,7 +125,7 @@ router.get('/:username', user_service.getUserName);
  * @inner
  * @param {function} user_service.updateUser - Controller function to update a user by username.
  */
-router.put('/:username', user_service.updateUser);
+router.put('/:username', authenticateToken, user_service.updateUser);
 
 
 module.exports = router;
