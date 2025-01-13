@@ -22,16 +22,6 @@ jobs:
         working-directory: ./backend
         run: npm install
 
-      # Test step skipped for now
-      # - name: Run tests
-      #   working-directory: ./backend
-      #   env:
-      #     NODE_ENV: test
-      #     DB_HOST: ${{ secrets.DB_HOST }}
-      #     DB_USER: ${{ secrets.DB_USER }}
-      #     DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      #     DB_NAME: ${{ secrets.DB_NAME }}
-      #   run: npm test
 
   deploy:
     runs-on: ubuntu-latest
@@ -41,19 +31,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '22'
 
+
       - name: Install dependencies
         working-directory: ./backend
         run: npm install
+
 
       - name: Add server to known_hosts
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
 
       - name: Deploy to Server and Run Migrations
         env:
@@ -61,6 +55,7 @@ jobs:
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
         run: |
+          sudo apt-get update && sudo apt-get install -y rsync
           echo "$SSH_PRIVATE_KEY" > private_key
           chmod 600 private_key
 
@@ -69,20 +64,22 @@ jobs:
 
           # SSH into the server to pull changes, run migrations, and restart the service
           ssh -i private_key $SERVER_USER@$SERVER_HOST << 'EOF'
-            cd ~/iGotha/backend
+          cd ~/iGotha/backend && ./runTest.sh
 
-            # Pull the latest code (in case rsync is not used)
-            git pull origin main
+          # Pull the latest code (in case rsync is not used)
+          git pull origin main
 
-            # Install dependencies on the server
-            npm install
+          # Install dependencies on the server
+          npm install
 
-            # Run database migrations
-            npm run migrate
+          # Run database migrations
+          # npm run migrate
 
-            # Restart the application using PM2
-            pm2 restart server
-          EOF
+          # Restart the application using PM2
+          pm2 restart server EOF
 
           # Clean up the private key
           rm private_key
+
+          # Clean up the known_hosts file
+          rm ~/.ssh/known_hosts
