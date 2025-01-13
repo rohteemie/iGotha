@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         working-directory: ./backend
         run: npm install
-        
+
 
   deploy:
     runs-on: ubuntu-latest
@@ -60,11 +60,11 @@ jobs:
           chmod 600 private_key
 
           # Sync the backend code to the server
-          # rsync -avz -e "ssh -i private_key" ./backend $SERVER_USER@$SERVER_HOST:~/iGotha/backend
+          rsync -avz -e "ssh -i private_key" ./backend $SERVER_USER@$SERVER_HOST:~/iGotha/backend
 
           # SSH into the server to pull changes, run migrations, and restart the service
           ssh -i private_key $SERVER_USER@$SERVER_HOST << 'EOF'
-          cd ~/iGotha/backend && ./runTest.s
+          cd ~/iGotha/backend && ./runTest.sh
 
           # Pull the latest code (in case rsync is not used)
           git pull origin main
@@ -83,4 +83,3 @@ jobs:
 
           # Clean up the known_hosts file
           rm ~/.ssh/known_hosts
-          
