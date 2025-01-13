@@ -134,3 +134,4 @@ dist
 doNotPushMain.yml
 .gitignore
 impt.txt
+.secrets
