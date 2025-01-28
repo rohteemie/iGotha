@@ -1,6 +1,26 @@
-# Overview
+# iGotha: A Simple and Scalable Chat Application
 
-iGotha is a simple chat application that provides routes for user registration, authentication and management. The application is structures into two main components: the frontend and the backend. The frontend is built using React and Redux, and the backend is built using Node.js, Express, and Sequelize. This document provides an overview of both components and describes the routes available in the backend.
+iGotha is an open-source chat application designed for seamless communication. It supports user registration, authentication, and chat functionality, making it ideal for personal or collaborative use. Whether you're a developer looking to contribute or a user exploring its features, iGotha is easy to set up and use.
+
+## Table of Contents
+
+- [Overview](#igotha-a-simple-and-scalable-chat-application)
+- [Table of Contents](#table-of-contents)
+- [Structure](#structure)
+- [Key features](#key-features)
+- [Frontend](#frontend)
+  - [Component](#components)
+  - [Frontend Installation](#frontend-installation)
+- [Backend](#backend)
+  - [Structure](#structure)
+  - [Route Overview](#route-overview)
+  - [Routes Test](#routes-test)
+
+  - [Authentication Routes (auth.route.js)](#authentication-routes-authroutejs)
+  - [User Routes (user.route.js)](#user-routes-userroutejs)
+- [License](#license)
+
+## Structure
 
 ```bash
 iGotcha/
@@ -14,18 +34,12 @@ iGotcha/
   └── .github/
 ```
 
-## Table of Contents
+## Key Features
 
-- [Overview](#overview)
-  - [Frontend](#frontend)
-  - [Backend](#backend)
-- [Installation](#installation)
-- [Folder Structure](#folder-structure)
-- [Route Overview](#route-overview)
-- [Routes](#routes)
-  - [Authentication Routes (auth.route.js)](#authentication-routes-authroutejs)
-  - [User Routes (user.route.js)](#user-routes-userroutejs)
-- [License](#license)
+- **Real-time Messaging**: Chat with users or groups in real-time.
+- **User Authentication**: Secure login and registration system.
+- **Group Chats**: Create and manage group conversations effortlessly.
+- **Scalability**: Built using modern technologies like React, Redux, Node.js, and Sequelize for scalability and performance.
 
 ## Frontend
 
@@ -168,31 +182,36 @@ This backend is built using node.js. It provides a user interface for user regis
    npx sequelize-cli db:migrate
    ```
 
-7. **Start the server**:
+3. **Start the server**:
 
    ```bash
    npm start
    ```
 
-8. **Access the API**:
+4. **Access the API**:
 
    You can now access the API at `http://localhost:3000`.
 
 ---
 
-## Folder Structure
+### Structure
 
 The backend routes are organized as follows:
 
 ```bash
 iGotcha/
     └── backend/
+        ├── models/
+        ├── services/
         ├── routes/
-        │   ├── auth.route.js
-        │   └── user.route.js
+        ├── middleware/
+        ├── config/
+        ├── helper/
+        ├── tests/
+        ├── websocket/
 ```
 
-## Route Overview
+### Route Overview
 
 This backend provides the following routes:
 
@@ -203,8 +222,16 @@ This backend provides the following routes:
 | `/user/create`    | POST        | Registers a new user          |
 | `/user/:username` | GET         | Fetches a user by username    |
 | `/user/:username` | PUT         | Updates a user by username    |
+| `/chat/`          | GET         | Fetches all chats by users    |
+| `/chat/create`    | POST        | Create a new chat             |
+| `/chat/:chatId`   | GET         | Fetches a chat using it ID    |
+| `/group/`         | POST        | Create a new group            |
+| `/group/`         | GET         | Fetches all the group info    |
+| `/group/:groupId` | GET         | Fetches group info using it ID|
+| `/group/:groupId` | POST        | Post messages to a group by ID|
+| `/group/add`      | PUT         | Use to add a user to a group  |
 
-## Routes
+### Routes Test
 
 Authentication Routes (auth.route.js)
 File Path: /home/fin/backend/routes/auth.route.js
@@ -279,3 +306,9 @@ Middleware: Authentication and validation middlewares should be implemented as n
 Error Handling: All routes should have error handling to manage invalid input and server errors.
 License
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## LICENSE
+
+Kinldy refer to the license page here: [LICENSE](https://github.com/rohteemie/igotha?tab=MIT-1-ov-file)
+
+## CONTRIBUTION
