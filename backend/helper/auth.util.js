@@ -46,12 +46,12 @@ async function compareHash(plainData, hashedData) {
  * @param {string} userId - The user ID for which the JWT is generated.
  * @returns {string} The generated JWT.
  */
-function generateJWT(id) {
+function generateJWT(id, username) {
   const secretKey = process.env.JWT_SECRET;
   const expiresIn = process.env.EXPIRE_IN;
 
   try {
-    return jwt.sign({ id }, secretKey, { expiresIn, algorithm: 'HS256' });
+    return jwt.sign({ id, username }, secretKey, { expiresIn, algorithm: 'HS256' });
   } catch (error) {
     console.error('Error generating JWT:', error);
     throw error;
@@ -77,7 +77,7 @@ function verifyToken(token) {
 
   try {
     const decodedToken = jwt.verify(token, secretKey);
-    return decodedToken.id; // Return user ID
+    return {id: decodedToken.id, username: decodedToken.username};
   } catch (err) {
     console.error('Error verifying token:', err.message);
     throw new Error('Invalid or expired token'); // Throw error instead of returning

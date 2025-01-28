@@ -1,28 +1,36 @@
-const redis = require("redis");
+const { createClient } = require('@redis/client');
 
-const redis_client = redis.createClient({
-  url: process.env.REDIS_URL || "redis://localhost:6379",
+// Create and configure a Redis client
+const redis_client = createClient({
+  socket: {
+    host: process.env.REDIS_HOST || '127.0.0.1',
+    port: process.env.REDIS_PORT || 6379,
+    reconnectStrategy: (retries) => Math.min(retries * 50, 2000), // Retry strategy
+  },
+  password: process.env.REDIS_PASSWORD || undefined, // Optional
+
 });
 
+// Handle connection events
+redis_client.on('connect', () => {
+  console.log('Connected to Redis');
+});
 
-// Ensure Redis connection is open before attempting to use it
-async function connectRedis() {
+redis_client.on('error', (err) => {
+  console.error('Redis connection error:', err);
+});
+
+// Function to connect the Redis client
+async function connect_redis() {
   if (!redis_client.isOpen) {
     try {
       await redis_client.connect();
-      console.log("Connected to Redis.");
+      console.log('Redis client connected');
     } catch (err) {
-      console.error("Failed to connect to Redis:", err);
+      console.error('Error connecting to Redis:', err);
     }
   }
 }
 
-connectRedis();
-
-process.on("SIGINT", async () => {
-  await redis_client.quit(); // Graceful shutdown
-  console.log("Redis connection closed.");
-  process.exit(0);
-});
-
-module.exports = { redis_client };
+// Export the Redis client and the connect function
+module.exports = { redis_client, connect_redis };
