@@ -2,9 +2,15 @@
 
 iGotha is an open-source chat application designed for seamless communication. It supports user registration, authentication, and chat functionality, making it ideal for personal or collaborative use. Whether you're a developer looking to contribute or a user exploring its features, iGotha is easy to set up and use.
 
+## Objective
+
+The objective of this project is to provide developers and engineers experience working with an open source project and also allow experience developers and engineers who hasnt work with node.js and it related technologies to be able contribute easily as the project is structured in a way that allows for easy integrations of news contributors.
+The project will also act as go to project to allow contributors to be able to show case it to there respected employer as soloproject they have contributed to in the past.
+
 ## Table of Contents
 
 - [Overview](#igotha-a-simple-and-scalable-chat-application)
+- [Objective](#objective)
 - [Table of Contents](#table-of-contents)
 - [Structure](#structure)
 - [Key features](#key-features)
@@ -79,10 +85,14 @@ iGotcha/
 
 3. **Create a `.env` file in the root directory and add the following environment variables**:
 
-  ```bash
-  API_ENDPOINT=localhost:8000
+  ```txt
+  API_ENDPOINT=localhost:3000
+  ```
 
-  npx dev start
+  ```bash
+  # Run the command below in terminal
+
+  ~/iGotha/frontend: npx dev start
   ```
 
   You can now access the iGotha page at `http://localhost:8000`
