@@ -4,70 +4,51 @@ const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
+const redisUtil = require('../helper/redis.util');
 
+// Configurable account lock duration
+const ACCOUNT_LOCK_DURATION_MINUTES = process.env.ACCOUNT_LOCK_DURATION || 10;
 
-/**
- * Hashes a password using bcrypt and returns the hashed password.
- * @param {string} password - The password to be hashed.
- * @returns {Promise<string>} A promise that resolves with the hashed password.
- * @throws {Error} If there is an error while hashing the password.
- */
 async function hashData(data) {
   try {
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(data, salt);
     return hash;
   } catch (err) {
-    throw new Error('Error hashing password:', err);
+    throw new Error('Error hashing data:', err);
   }
 }
 
-
-/**
- * Compares two passwords in a secure and constant-time manner.
- *
- * @param {string} hashedPassword - The hashed password to compare.
- * @param {string} userPassword - The user's password to compare.
- * @returns {boolean} - Returns true if the passwords match, false otherwise.
- */
 async function compareHash(plainData, hashedData) {
   try {
     return await bcrypt.compare(plainData, hashedData);
   } catch (err) {
-    throw new Error('Error comparing passwords:', err);
+    throw new Error('Error comparing data:', err);
   }
 }
 
-
-
-/**
- * Generates a JSON Web Token (JWT) for the provided user ID.
- *
- * @param {string} userId - The user ID for which the JWT is generated.
- * @returns {string} The generated JWT.
- */
-function generateJWT(sub, username) {
+function generateJWT(sub, username, role = null) {
   const secretKey = process.env.JWT_SECRET;
   const expiresIn = process.env.EXPIRE_IN;
 
+  if (!secretKey) {
+    throw new Error('JWT secret key is missing');
+  }
+
   try {
-    return jwt.sign({ sub, username }, secretKey, { expiresIn, algorithm: 'HS256' });
+    const payload = { sub, username };
+    if (role) payload.role = role;
+    return jwt.sign(payload, secretKey, { expiresIn, algorithm: 'HS256' });
   } catch (error) {
     console.error('Error generating JWT:', error);
     throw error;
   }
 }
 
-
-/**
- * Verifies the authenticity of a JSON Web Token (JWT).
- * @param {string} token - The JWT to be verified.
- */
 function verifyToken(token) {
   const secretKey = process.env.JWT_SECRET;
 
   if (!secretKey) {
-    console.error('Secret key is missing');
     throw new Error('Internal server error: Missing secret key');
   }
 
@@ -77,22 +58,21 @@ function verifyToken(token) {
 
   try {
     const decodedToken = jwt.verify(token, secretKey);
-    return {id: decodedToken.id, username: decodedToken.username};
+    return decodedToken;
   } catch (err) {
     console.error('Error verifying token:', err.message);
-    throw new Error('Invalid or expired token'); // Throw error instead of returning
+
+    if (err.name === 'TokenExpiredError') {
+      // throw new Error('Token expired, use refresh token');
+      console.log('Token expired, use refresh token');
+    } else if (err.name === 'JsonWebTokenError') {
+      throw new Error('Invalid token');
+    } else {
+      throw new Error('Token verification failed');
+    }
   }
 }
 
-
-
-/**
- * Resets the login count and unlocks the account for users whose account lock duration has expired.
- * @async
- * @function reset_login_count
- * @throws {Error} If an error occurs while resetting the login count.
- * @returns {Promise<void>} A promise that resolves when the login count is reset successfully.
- */
 const reset_login_count = async function () {
   try {
     await storage.sync();
@@ -102,37 +82,56 @@ const reset_login_count = async function () {
     const lockedUsers = await Auth.findAll({
       where: {
         account_locked: true,
-        account_locked_date: { [Op.ne]: null }
-      }
+        account_locked_date: { [Op.ne]: null },
+      },
     });
 
     for (const user of lockedUsers) {
       const lockedTime = new Date(user.account_locked_time);
       const timeDifference = (now - lockedTime) / 1000 / 60;
 
-      if (timeDifference > 10) {
-        await Auth.update({
-          failed_login_count: 0,
-          account_locked: false,
-          account_locked_date: null,
-          account_locked_time: null,
-        }, {
-          where: {
-            id: user.id,
+      if (timeDifference > ACCOUNT_LOCK_DURATION_MINUTES) {
+        await Auth.update(
+          {
+            failed_login_count: 0,
+            account_locked: false,
+            account_locked_date: null,
+            account_locked_time: null,
           },
-        });
+          {
+            where: {
+              id: user.id,
+            },
+          }
+        );
       }
     }
   } catch (error) {
     console.error('Error resetting login count:', error);
+    throw error;
   }
 };
 
+async function addToBlacklist(token, expirySeconds) {
+  if (!token || !expirySeconds) {
+    throw new Error('Token and expiry time are required');
+  }
+  await redisUtil.set(`blacklist:${token}`, 'true', expirySeconds);
+}
+
+async function isBlacklisted(token) {
+  if (!token) {
+    throw new Error('Token is required');
+  }
+  return await redisUtil.get(`blacklist:${token}`);
+}
 
 module.exports = {
   hashData,
   generateJWT,
   compareHash,
   verifyToken,
-  reset_login_count
+  reset_login_count,
+  addToBlacklist,
+  isBlacklisted,
 };
