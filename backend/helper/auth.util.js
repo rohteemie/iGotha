@@ -60,6 +60,67 @@ function generateJWT(sub, username) {
 
 
 /**
+ * Generates a refresh token (JWT) for the provided user ID.
+ * Refresh tokens have a longer expiration time than access tokens.
+ *
+ * @param {string} sub - The user ID for which the refresh token is generated.
+ * @param {string} username - The username associated with the token.
+ * @returns {string} The generated refresh token (JWT).
+ */
+function generateRefreshToken(sub, username) {
+  const secretKey = process.env.JWT_SECRET;
+  const refreshExpiresIn = process.env.REFRESH_EXPIRE_IN || '7d';
+
+  try {
+    return jwt.sign({ sub, username, type: 'refresh' }, secretKey, { expiresIn: refreshExpiresIn, algorithm: 'HS256' });
+  } catch (error) {
+    console.error('Error generating refresh token:', error);
+    throw error;
+  }
+}
+
+
+/**
+ * Verifies the authenticity of a refresh token (JWT).
+ * 
+ * @param {string} token - The refresh token to be verified.
+ * @returns {Object} The decoded token payload containing user information.
+ * @throws {Error} If the token is invalid, expired, or not a refresh token.
+ */
+function verifyRefreshToken(token) {
+  const secretKey = process.env.JWT_SECRET;
+
+  if (!secretKey) {
+    console.error('Secret key is missing');
+    throw new Error('Internal server error: Missing secret key');
+  }
+
+  if (!token) {
+    throw new Error('Refresh token not provided');
+  }
+
+  try {
+    const decodedToken = jwt.verify(token, secretKey);
+    
+    if (decodedToken.type !== 'refresh') {
+      throw new Error('Invalid token type');
+    }
+    
+    return { sub: decodedToken.sub, username: decodedToken.username };
+  } catch (err) {
+    console.error('Error verifying refresh token:', err.message);
+    if (err.name === 'TokenExpiredError') {
+      throw new Error('Refresh token expired');
+    }
+    if (err.message === 'Invalid token type') {
+      throw err;
+    }
+    throw new Error('Invalid refresh token');
+  }
+}
+
+
+/**
  * Verifies the authenticity of a JSON Web Token (JWT).
  * @param {string} token - The JWT to be verified.
  */
@@ -132,7 +193,9 @@ const reset_login_count = async function () {
 module.exports = {
   hashData,
   generateJWT,
+  generateRefreshToken,
   compareHash,
   verifyToken,
+  verifyRefreshToken,
   reset_login_count
 };
