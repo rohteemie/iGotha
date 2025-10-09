@@ -4,7 +4,7 @@
 
 ### BEFORE (Vulnerable) ❌
 
-```
+```bash
 User Login Flow - INSECURE
 ═══════════════════════════════════════════════════════════════
 
@@ -93,7 +93,7 @@ Attack Scenario - EASY
 
 ### AFTER (Secure) ✅
 
-```
+```bash
 User Login Flow - SECURE
 ═══════════════════════════════════════════════════════════════
 
@@ -230,7 +230,7 @@ Attack Scenario - BLOCKED
 
 ### Before (1 Layer) ❌
 
-```
+```bash
 ┌────────────────┐
 │ Database       │
 │ Lookup         │ ← Only check: Does UUID exist?
@@ -239,7 +239,7 @@ Attack Scenario - BLOCKED
 
 ### After (5 Layers) ✅
 
-```
+```bash
 ┌────────────────┐
 │ 1. JWT         │
 │    Signature   │ ← Verify cryptographic signature
@@ -273,7 +273,7 @@ Attack Scenario - BLOCKED
 
 ### Before: Plain UUID ❌
 
-```
+```bash
 Token: "c3a08716-61f0-443a-aa0c-fcf1ebce4b76"
 
 Structure: Just a random string
@@ -289,7 +289,7 @@ Security: NONE ❌
 
 ### After: JWT with Signature ✅
 
-```
+```bash
 Token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjNlNDU2Ny1lODliLTEyZDMtYTQ1Ni00MjY2MTQxNzQwMDAiLCJ1c2VybmFtZSI6ImpvaG5kb2UiLCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTUxNjIzOTAyMiwiZXhwIjoxNTE2ODQzODIyfQ.4pcPyMD09olPSyXnrXCjTwXyr4BsezdI1AVTmud2fU4"
 
 Structure:
@@ -359,7 +359,8 @@ auths table:
                             Bcrypt hash - Unusable even if leaked! ✅
 ```
 
-**Key Difference**: 
+**Key Difference**:
+
 - Before: Database leak = all tokens compromised
 - After: Database leak = tokens still protected (need original JWT + signature)
 
@@ -382,12 +383,14 @@ auths table:
 ## Test Coverage
 
 ### Before ❌
-```
+
+```bash
 No tests for refresh token security
 ```
 
 ### After ✅
-```
+
+```bash
 ✓ should generate a valid JWT refresh token
 ✓ should include user information and type in the token
 ✓ should have longer expiration than access token
@@ -412,6 +415,7 @@ No tests for refresh token security
 ### Security Transformation
 
 **Before**: 🔓 Vulnerable
+
 - Plain UUIDs
 - Database lookup only
 - No cryptographic protection
@@ -419,6 +423,7 @@ No tests for refresh token security
 - Easily exploitable
 
 **After**: 🔒 Secure
+
 - Cryptographically signed JWTs
 - Multi-layer verification
 - HMAC-SHA256 signatures
@@ -427,10 +432,10 @@ No tests for refresh token security
 
 ### Impact
 
-✅ **User accounts now protected by cryptographic security**  
-✅ **Multiple layers of defense**  
-✅ **Database breach mitigated**  
-✅ **Token theft significantly harder**  
+✅ **User accounts now protected by cryptographic security**
+✅ **Multiple layers of defense**
+✅ **Database breach mitigated**
+✅ **Token theft significantly harder**
 ✅ **Industry-standard implementation**
 
 ### Result
@@ -440,6 +445,7 @@ No tests for refresh token security
 ---
 
 *For detailed technical documentation, see:*
+
 - *[Authentication Security Guide](./AUTHENTICATION_SECURITY.md)*
 - *[Security Incident Report](./SECURITY_INCIDENT_REPORT.md)*
 - *[API Authentication Guide](./API_AUTHENTICATION.md)*

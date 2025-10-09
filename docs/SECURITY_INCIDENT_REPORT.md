@@ -2,12 +2,12 @@
 
 ## Executive Summary
 
-**Incident ID**: SEC-2024-001  
-**Severity**: CRITICAL  
-**Status**: RESOLVED  
-**Date Reported**: 2024  
-**Date Resolved**: 2024  
-**Affected Component**: Authentication System - Refresh Token Mechanism  
+**Incident ID**: SEC-2024-001
+**Severity**: CRITICAL
+**Status**: RESOLVED
+**Date Reported**: 2024
+**Date Resolved**: 2024
+**Affected Component**: Authentication System - Refresh Token Mechanism
 
 A critical security vulnerability was discovered in the refresh token implementation that allowed unauthorized access to user accounts using simple UUID strings. This has been fully resolved with JWT-based cryptographic verification.
 
@@ -24,6 +24,7 @@ The application's refresh token mechanism was using plain UUIDs (Universally Uni
 **CVSS Score**: 9.8 (Critical)
 
 **Breakdown**:
+
 - **Attack Vector**: Network (can be exploited remotely)
 - **Attack Complexity**: Low (minimal effort required)
 - **Privileges Required**: None (no authentication needed)
@@ -43,28 +44,28 @@ The application's refresh token mechanism was using plain UUIDs (Universally Uni
 // BEFORE (VULNERABLE) ❌
 async function login(req, res) {
     // ... authentication logic ...
-    
+
     const refreshToken = uuidv4(); // Just a random UUID
     await Auth.update(
         { refresh_token: refreshToken }, // Stored in plain text
         { where: { email } }
     );
-    
+
     return res.json({ accessToken, refreshToken });
 }
 
 async function refreshAccessToken(req, res) {
     const { refreshToken } = req.body;
-    
+
     // Simple database lookup - NO cryptographic verification
-    const authRecord = await Auth.findOne({ 
-        where: { refresh_token: refreshToken } 
+    const authRecord = await Auth.findOne({
+        where: { refresh_token: refreshToken }
     });
-    
+
     if (!authRecord) {
         return res.status(403).json({ message: 'Invalid refresh token' });
     }
-    
+
     // Issue new access token without verifying token authenticity
     const newAccessToken = generateJWT(userRecord.id, userRecord.username);
     return res.json({ accessToken: newAccessToken });
@@ -73,25 +74,25 @@ async function refreshAccessToken(req, res) {
 
 #### Attack Scenario
 
-```
+```bash
 ┌──────────────┐                                  ┌──────────────┐
 │   Attacker   │                                  │    Server    │
 └──────┬───────┘                                  └──────┬───────┘
        │                                                 │
-       │  1. Obtain any valid UUID                      │
-       │     (could be guessed, leaked, or intercepted) │
+       │  1. Obtain any valid UUID                       │
+       │     (could be guessed, leaked, or intercepted)  │
        │     UUID: "c3a08716-61f0-443a-aa0c-fcf1ebce4b76"│
        │                                                 │
-       │  2. POST /auth/refresh-token                   │
-       │     { refreshToken: "c3a08716-..." }           │
+       │  2. POST /auth/refresh-token                    │
+       │     { refreshToken: "c3a08716-..." }            │
        ├────────────────────────────────────────────────>│
        │                                                 │
-       │                                   3. DB Lookup  │
-       │                                   4. UUID Found │
-       │                                   5. Generate   │
-       │                                      Access Token│
+       │                                  3. DB Lookup   │
+       │                                  4. UUID Found  │
+       │                                  5. Generate    │
+       │                                     Access Token│
        │                                                 │
-       │  6. Response: { accessToken: "..." }           │
+       │  6. Response: { accessToken: "..." }            │
        │<────────────────────────────────────────────────│
        │                                                 │
        │  7. Attacker now has full account access! ❌   │
@@ -124,21 +125,25 @@ async function refreshAccessToken(req, res) {
 ## Impact Assessment
 
 ### Confidentiality Impact: HIGH
+
 - Attackers could access any user account
 - Personal information exposed
 - Private messages and data readable
 
 ### Integrity Impact: HIGH
+
 - Attackers could modify user data
 - Send messages as the victim
 - Change account settings
 
 ### Availability Impact: MEDIUM
+
 - Account could be locked by attacker
 - Legitimate user denied access
 - Service disruption possible
 
 ### Affected Users
+
 - **Potential**: All registered users
 - **Confirmed**: No confirmed exploits detected
 - **Risk**: 100% of user accounts vulnerable
@@ -156,17 +161,18 @@ async function refreshAccessToken(req, res) {
 function generateRefreshToken(sub, username) {
   const secretKey = process.env.JWT_SECRET;
   const refreshExpiresIn = process.env.REFRESH_EXPIRE_IN || '7d';
-  
+
   // Create cryptographically signed JWT
   return jwt.sign(
-    { sub, username, type: 'refresh' }, 
-    secretKey, 
+    { sub, username, type: 'refresh' },
+    secretKey,
     { expiresIn: refreshExpiresIn, algorithm: 'HS256' }
   );
 }
 ```
 
 **Security Properties**:
+
 - Signed with secret key (HMAC-SHA256)
 - Cannot be forged without the secret
 - Contains expiration time
@@ -177,15 +183,15 @@ function generateRefreshToken(sub, username) {
 ```javascript
 function verifyRefreshToken(token) {
   const secretKey = process.env.JWT_SECRET;
-  
+
   try {
     const decodedToken = jwt.verify(token, secretKey);
-    
+
     // Verify token type
     if (decodedToken.type !== 'refresh') {
       throw new Error('Invalid token type');
     }
-    
+
     return { sub: decodedToken.sub, username: decodedToken.username };
   } catch (err) {
     if (err.name === 'TokenExpiredError') {
@@ -197,6 +203,7 @@ function verifyRefreshToken(token) {
 ```
 
 **Security Properties**:
+
 - Verifies JWT signature
 - Checks expiration
 - Validates token type
@@ -207,23 +214,24 @@ function verifyRefreshToken(token) {
 ```javascript
 async function login(req, res) {
     // ... authentication ...
-    
+
     const refreshToken = generateRefreshToken(userId, username);
-    
+
     // Hash the token before storage
     const hashedRefreshToken = await hashData(refreshToken);
-    
+
     await Auth.update(
         { refresh_token: hashedRefreshToken },
         { where: { email } }
     );
-    
+
     // Return unhashed token to client
     return res.json({ accessToken, refreshToken });
 }
 ```
 
 **Security Properties**:
+
 - Database breach doesn't expose tokens
 - Bcrypt hashing (slow, salted)
 - One-way function (irreversible)
@@ -233,31 +241,31 @@ async function login(req, res) {
 ```javascript
 async function refreshAccessToken(req, res) {
   const { refreshToken } = req.body;
-  
+
   try {
     // Step 1: Verify JWT signature and expiration
     const decoded = verifyRefreshToken(refreshToken);
-    
+
     // Step 2: Find user
     const userRecord = await User.findOne({ where: { id: decoded.sub } });
     if (!userRecord) {
       return res.status(403).json({ message: 'Invalid refresh token' });
     }
-    
+
     // Step 3: Verify hash in database
     const authRecord = await Auth.findOne({ where: { email: userRecord.email } });
     if (!authRecord || !authRecord.refresh_token) {
       return res.status(403).json({ message: 'Invalid refresh token' });
     }
-    
+
     const isValidToken = await compareHash(refreshToken, authRecord.refresh_token);
     if (!isValidToken) {
       return res.status(403).json({ message: 'Invalid refresh token' });
     }
-    
+
     // Step 4: Generate new access token
     const newAccessToken = generateJWT(userRecord.id, userRecord.username);
-    
+
     return res.status(200).json({ accessToken: newAccessToken });
   } catch (error) {
     // Proper error handling
@@ -270,6 +278,7 @@ async function refreshAccessToken(req, res) {
 ```
 
 **Security Properties**:
+
 - Multiple validation layers
 - JWT verification + hash comparison
 - Proper error handling
@@ -318,7 +327,7 @@ Created comprehensive test suite with 13 test cases:
 test('should NOT accept plain UUID as refresh token', () => {
   const { v4: uuidv4 } = require('uuid');
   const plainUuid = uuidv4();
-  
+
   // This now properly rejects UUIDs
   expect(() => {
     verifyRefreshToken(plainUuid);
@@ -470,13 +479,13 @@ test('should NOT accept plain UUID as refresh token', () => {
 
 ## Approval and Sign-off
 
-**Prepared by**: GitHub Copilot  
-**Date**: 2024  
-**Status**: Resolution Implemented and Tested  
+**Prepared by**: GitHub Copilot
+**Date**: 2024
+**Status**: Resolution Implemented and Tested
 
 **Next Review Date**: 3 months from deployment
 
 ---
 
-**Classification**: Internal Security Report  
+**Classification**: Internal Security Report
 **Distribution**: Development Team, Security Team, Management

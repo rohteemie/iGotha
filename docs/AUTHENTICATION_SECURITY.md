@@ -16,13 +16,13 @@ This document provides a detailed explanation of the authentication and authoriz
 
 ## Authentication Flow
 
-```
+```bash
 ┌─────────────┐                                    ┌─────────────┐
 │   Client    │                                    │   Server    │
 └──────┬──────┘                                    └──────┬──────┘
        │                                                  │
-       │  1. POST /auth/login                            │
-       │     { email, password }                         │
+       │  1. POST /auth/login                             │
+       │     { email, password }                          │
        ├─────────────────────────────────────────────────>│
        │                                                  │
        │                                         2. Verify credentials
@@ -30,17 +30,17 @@ This document provides a detailed explanation of the authentication and authoriz
        │                                         4. Hash refresh token
        │                                         5. Store hash in DB
        │                                                  │
-       │  6. Return tokens                               │
-       │     { accessToken, refreshToken, user }         │
+       │  6. Return tokens                                │
+       │     { accessToken, refreshToken, user }          │
        │<─────────────────────────────────────────────────┤
        │                                                  │
-       │  7. Use accessToken for API calls               │
-       │     Authorization: Bearer {accessToken}         │
+       │  7. Use accessToken for API calls                │
+       │     Authorization: Bearer {accessToken}          │
        ├─────────────────────────────────────────────────>│
        │                                                  │
-       │  8. When accessToken expires                    │
-       │     POST /auth/refresh-token                    │
-       │     { refreshToken }                            │
+       │  8. When accessToken expires                     │
+       │     POST /auth/refresh-token                     │
+       │     { refreshToken }                             │
        ├─────────────────────────────────────────────────>│
        │                                                  │
        │                                         9. Verify JWT signature
@@ -48,8 +48,8 @@ This document provides a detailed explanation of the authentication and authoriz
        │                                         11. Verify hash in DB
        │                                         12. Generate new accessToken
        │                                                  │
-       │  13. Return new accessToken                     │
-       │      { accessToken }                            │
+       │  13. Return new accessToken                      │
+       │      { accessToken }                             │
        │<─────────────────────────────────────────────────┤
        │                                                  │
 ```
@@ -61,6 +61,7 @@ This document provides a detailed explanation of the authentication and authoriz
 **Purpose**: Short-lived token for API authentication
 
 **Structure**:
+
 ```json
 {
   "sub": "user-uuid",
@@ -79,6 +80,7 @@ This document provides a detailed explanation of the authentication and authoriz
 **Purpose**: Long-lived token for obtaining new access tokens
 
 **Structure**:
+
 ```json
 {
   "sub": "user-uuid",
@@ -94,6 +96,7 @@ This document provides a detailed explanation of the authentication and authoriz
 **Use Case**: Used only at the `/auth/refresh-token` endpoint to obtain new access tokens
 
 **Key Differences**:
+
 - Includes `type: "refresh"` claim to prevent misuse
 - Significantly longer expiration time
 - Hashed before storage in database
@@ -146,7 +149,7 @@ await Auth.update(
 );
 
 // Refresh endpoint
-const authRecord = await Auth.findOne({ 
+const authRecord = await Auth.findOne({
     where: { refresh_token: refreshToken } // Simple DB lookup
 });
 ```
@@ -189,34 +192,41 @@ REFRESH_EXPIRE_IN=7d            # Refresh token expiration
 ### Helper Functions
 
 #### `generateRefreshToken(sub, username)`
+
 Generates a JWT refresh token with extended expiration.
 
 **Parameters**:
+
 - `sub` (string): User ID
 - `username` (string): Username
 
 **Returns**: JWT string
 
 **Example**:
+
 ```javascript
 const refreshToken = generateRefreshToken('user-123', 'johndoe');
 // Returns: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
 #### `verifyRefreshToken(token)`
+
 Verifies a refresh token's authenticity and validity.
 
 **Parameters**:
+
 - `token` (string): Refresh token to verify
 
 **Returns**: Object with `{ sub, username }`
 
 **Throws**:
+
 - `'Refresh token expired'` if token is expired
 - `'Invalid token type'` if not a refresh token
 - `'Invalid refresh token'` for other errors
 
 **Example**:
+
 ```javascript
 try {
     const decoded = verifyRefreshToken(token);
@@ -251,6 +261,7 @@ CREATE TABLE auths (
 Authenticates user and returns access and refresh tokens.
 
 **Request**:
+
 ```json
 {
   "email": "user@example.com",
@@ -259,6 +270,7 @@ Authenticates user and returns access and refresh tokens.
 ```
 
 **Response (200 OK)**:
+
 ```json
 {
   "user": {
@@ -273,6 +285,7 @@ Authenticates user and returns access and refresh tokens.
 ```
 
 **Error Responses**:
+
 - `400`: Missing email or password
 - `401`: Invalid credentials
 - `403`: Account locked
@@ -283,6 +296,7 @@ Authenticates user and returns access and refresh tokens.
 Obtains a new access token using a valid refresh token.
 
 **Request**:
+
 ```json
 {
   "refreshToken": "eyJhbGciOiJIUzI1NiIs..."
@@ -290,6 +304,7 @@ Obtains a new access token using a valid refresh token.
 ```
 
 **Response (200 OK)**:
+
 ```json
 {
   "accessToken": "eyJhbGciOiJIUzI1NiIs..."
@@ -297,6 +312,7 @@ Obtains a new access token using a valid refresh token.
 ```
 
 **Error Responses**:
+
 - `401`: Missing or expired refresh token
 - `403`: Invalid refresh token
 - `500`: Server error
@@ -352,6 +368,7 @@ npm test -- refreshToken.test.js
 ### Test Coverage
 
 The test suite covers:
+
 - ✅ Token generation
 - ✅ Token verification
 - ✅ Token expiration
@@ -365,7 +382,7 @@ The test suite covers:
 ```javascript
 test('should NOT accept plain UUID as refresh token', () => {
   const plainUuid = uuidv4();
-  
+
   expect(() => {
     verifyRefreshToken(plainUuid);
   }).toThrow('Invalid refresh token');
@@ -393,6 +410,7 @@ If you're upgrading from the old UUID-based refresh tokens:
 ### "Invalid refresh token" Error
 
 **Possible causes**:
+
 - Token has expired
 - Token signature is invalid
 - Token is not a refresh token (access token used instead)

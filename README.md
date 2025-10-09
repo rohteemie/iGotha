@@ -21,7 +21,6 @@ The project will also act as go to project to allow contributors to be able to s
   - [Structure](#structure)
   - [Route Overview](#route-overview)
   - [Routes Test](#routes-test)
-
   - [Authentication Routes (auth.route.js)](#authentication-routes-authroutejs)
   - [User Routes (user.route.js)](#user-routes-userroutejs)
 - [License](#license)
@@ -204,7 +203,7 @@ This backend is built using node.js. It provides a user interface for user regis
 
 ---
 
-### Structure
+### Backend Structure
 
 The backend routes are organized as follows:
 

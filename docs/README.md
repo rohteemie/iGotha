@@ -29,9 +29,10 @@ This directory contains comprehensive documentation for the iGotha application.
 
 **Critical Security Fix**: Refresh Token Authentication
 
-The application recently underwent a critical security update to fix a vulnerability in the refresh token mechanism. Previously, plain UUIDs were used as refresh tokens, which could be exploited for unauthorized access. 
+The application recently underwent a critical security update to fix a vulnerability in the refresh token mechanism. Previously, plain UUIDs were used as refresh tokens, which could be exploited for unauthorized access.
 
 **New Implementation**:
+
 - ✅ JWT-based refresh tokens with cryptographic signatures
 - ✅ Hashed token storage in database
 - ✅ Multi-layer verification (JWT + hash)
@@ -39,24 +40,28 @@ The application recently underwent a critical security update to fix a vulnerabi
 - ✅ Comprehensive test coverage
 
 For details, see:
+
 - [Security Incident Report](./SECURITY_INCIDENT_REPORT.md)
 - [Authentication Security Guide](./AUTHENTICATION_SECURITY.md)
 
 ## 🎯 Quick Links
 
 ### For Developers
+
 - [Authentication Flow Diagram](./AUTHENTICATION_SECURITY.md#authentication-flow)
 - [Implementation Guide](./AUTHENTICATION_SECURITY.md#implementation-details)
 - [API Endpoints](./API_AUTHENTICATION.md#api-endpoints)
 - [Code Examples](./API_AUTHENTICATION.md#code-examples)
 
 ### For Security Team
+
 - [Vulnerability Details](./SECURITY_INCIDENT_REPORT.md#vulnerability-details)
 - [Threat Model](./AUTHENTICATION_SECURITY.md#security-considerations)
 - [Security Measures](./SECURITY_INCIDENT_REPORT.md#implemented-security-measures)
 - [Recommendations](./SECURITY_INCIDENT_REPORT.md#recommendations)
 
 ### For API Users
+
 - [Quick Start](./API_AUTHENTICATION.md#quick-start)
 - [Token Types](./API_AUTHENTICATION.md#token-types)
 - [Authentication Flow](./API_AUTHENTICATION.md#authentication-flow)
@@ -64,7 +69,7 @@ For details, see:
 
 ## 📊 Documentation Structure
 
-```
+```bash
 docs/
 ├── README.md                          # This file
 ├── AUTHENTICATION_SECURITY.md         # Security architecture guide
@@ -114,10 +119,11 @@ When updating documentation:
 ## 📞 Contact
 
 For questions about this documentation:
+
 - Create an issue in the repository
 - Contact the development team
-- Rotimi Email: iamrotimiowolabi@gmail.com
-- Ajiboye Email: placeholder@placeholder.com
+- Rotimi Email: <iamrotimiowolabi@gmail.com>
+- Ajiboye Email: <placeholder@placeholder.com>
 
 ## 📄 License
 
@@ -125,5 +131,5 @@ This documentation is part of the iGotha project and is covered under the same l
 
 ---
 
-**Last Updated**: 2024  
+**Last Updated**: 2024
 **Maintained By**: iGotha Development Team
