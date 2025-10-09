@@ -116,7 +116,8 @@ When updating documentation:
 For questions about this documentation:
 - Create an issue in the repository
 - Contact the development team
-- Email: support@example.com
+- Rotimi Email: iamrotimiowolabi@gmail.com
+- Ajiboye Email: placeholder@placeholder.com
 
 ## 📄 License
 
