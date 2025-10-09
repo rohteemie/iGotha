@@ -85,6 +85,28 @@ Detailed specifications for all reusable React Native components:
 - Usage instructions
 - Styling guidelines
 
+### 5. [Quick Start Guide](./QUICK_START_GUIDE.md)
+Step-by-step guide to set up your development environment:
+- Prerequisites and required software
+- Project setup options (React Native CLI vs Expo)
+- Project structure setup
+- Configuration files
+- Initial setup code
+- Running the backend
+- Testing the setup
+- Common issues and solutions
+- Development workflow
+
+### 6. [How to Create Issues](./HOW_TO_CREATE_ISSUES.md)
+Guide for creating GitHub issues from the documentation:
+- Manual issue creation workflow
+- Issue list organized by priority
+- Sample issue creation
+- Bulk issue creation with GitHub CLI
+- Project organization (milestones, project boards)
+- Issue dependencies
+- Tips for success
+
 ## Quick Start
 
 ### For Project Managers
@@ -93,14 +115,28 @@ Detailed specifications for all reusable React Native components:
 3. Follow the [IMPLEMENTATION_ROADMAP.md](./IMPLEMENTATION_ROADMAP.md) for scheduling
 
 ### For Developers
-1. Start with [IMPLEMENTATION_ROADMAP.md](./IMPLEMENTATION_ROADMAP.md) to understand the development phases
-2. Refer to [API_INTEGRATION_GUIDE.md](./API_INTEGRATION_GUIDE.md) for backend integration
-3. Use [COMPONENT_SPECIFICATIONS.md](./COMPONENT_SPECIFICATIONS.md) as a reference for building UI components
-4. Create GitHub issues based on [FRONTEND_ISSUES.md](./FRONTEND_ISSUES.md)
+1. Start with [QUICK_START_GUIDE.md](./QUICK_START_GUIDE.md) to set up your development environment
+2. Review [IMPLEMENTATION_ROADMAP.md](./IMPLEMENTATION_ROADMAP.md) to understand the development phases
+3. Refer to [API_INTEGRATION_GUIDE.md](./API_INTEGRATION_GUIDE.md) for backend integration
+4. Use [COMPONENT_SPECIFICATIONS.md](./COMPONENT_SPECIFICATIONS.md) as a reference for building UI components
+5. Create GitHub issues based on [FRONTEND_ISSUES.md](./FRONTEND_ISSUES.md)
 
-## Creating GitHub Issues
+## Getting Started
 
-Use the issue template at `.github/ISSUE_TEMPLATE/frontend-feature.md` to create new issues. Each issue should include:
+### Quick Setup
+Follow the [QUICK_START_GUIDE.md](./QUICK_START_GUIDE.md) for detailed instructions on:
+- Installing prerequisites (Node.js, React Native, etc.)
+- Creating a new React Native project
+- Setting up project structure
+- Installing dependencies
+- Configuring the development environment
+- Running the app on iOS/Android
+
+### Creating GitHub Issues
+
+Use the issue template at `.github/ISSUE_TEMPLATE/frontend-feature.md` to create new issues. For detailed instructions, see [HOW_TO_CREATE_ISSUES.md](./HOW_TO_CREATE_ISSUES.md).
+
+Each issue should include:
 - Feature description
 - Related backend endpoint
 - Acceptance criteria
