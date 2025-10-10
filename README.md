@@ -50,6 +50,8 @@ iGotcha/
 
 The frontend is built using React and Redux. It provides a user interface for user registration, login, and chat functionality. The frontend is organized into the following components:
 
+> **📋 [View the Complete Frontend Development Roadmap](frontend/ROADMAP.md)** - A comprehensive guide covering all phases from planning to deployment, including technology stack, timelines, and best practices.
+
 ### Components
 
 The frontend components are organized as follows:
