@@ -5,6 +5,7 @@ Thank you for considering contributing to our project! To make the process smoot
 ## How Can You Contribute?
 
 ### Reporting Bugs
+
 If you find a bug, please search the [issues](https://github.com/rohteemie/iGotha/issues) to see if someone has already reported it. If not, please create a new issue with the following:
 
 - A description of the problem.
@@ -12,12 +13,14 @@ If you find a bug, please search the [issues](https://github.com/rohteemie/iGoth
 - Screenshots or logs if applicable.
 
 ### Requesting Features
+
 If you have an idea for a new feature, please open an issue with:
 
 - A clear description of the feature.
 - How it would benefit the project.
 
 ### Submitting Pull Requests
+
 If you would like to submit code, please ensure that:
 
 - Your code follows the project's coding style.
@@ -27,10 +30,11 @@ If you would like to submit code, please ensure that:
 - You make sure your PR is based on the latest main branch.
 
 ### Code Style
+
 Please ensure your code follows ESLint rules set for this project.
 
-
 ## Community Guidelines
+
 Please follow the [Code of Conduct](CODE_OF_CONDUCT.md) while interacting with the community.
 
 Thank you for helping to make iGotha better!

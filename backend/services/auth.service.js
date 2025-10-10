@@ -4,8 +4,10 @@ const { User } = require('../models/associations.model');
 const {
    compareHash,
    generateJWT,
+   generateRefreshToken,
+   verifyRefreshToken,
+   hashData,
 } = require('../helper/auth.util');
-const { v4: uuidv4 } = require('uuid');
 
 /**
  * Handles user login by verifying credentials and generating a JWT token.
@@ -58,9 +60,13 @@ async function login(req, res) {
 
         // Reset failed login count and generate tokens
         const accessToken = generateJWT(sub = userData.id, username = userData.username);
-        const refreshToken = uuidv4();
+        const refreshToken = generateRefreshToken(sub = userData.id, username = userData.username);
+        
+        // Hash the refresh token before storing in the database
+        const hashedRefreshToken = await hashData(refreshToken);
+        
         await Auth.update(
-            { failed_login_count: 0, account_locked: false, refresh_token: refreshToken },
+            { failed_login_count: 0, account_locked: false, refresh_token: hashedRefreshToken },
             { where: { email } }
         );
 
@@ -93,15 +99,30 @@ async function refreshAccessToken(req, res) {
   }
 
   try {
-    // Find the user with the provided refresh token
-    const authRecord = await Auth.findOne({ where: { refresh_token: refreshToken } });
-
-    if (!authRecord) {
+    // Verify the refresh token JWT
+    const decoded = verifyRefreshToken(refreshToken);
+    
+    // Find the user by the decoded user ID
+    const userRecord = await User.findOne({ where: { id: decoded.sub } });
+    
+    if (!userRecord) {
       return res.status(403).json({ message: 'Invalid refresh token' });
     }
-
-    const email = authRecord.email
-    const userRecord = await User.findOne({ where: { email } });
+    
+    // Get the auth record to verify the stored hashed refresh token
+    const authRecord = await Auth.findOne({ where: { email: userRecord.email } });
+    
+    if (!authRecord || !authRecord.refresh_token) {
+      return res.status(403).json({ message: 'Invalid refresh token' });
+    }
+    
+    // Verify the refresh token matches the stored hash
+    const { compareHash } = require('../helper/auth.util');
+    const isValidToken = await compareHash(refreshToken, authRecord.refresh_token);
+    
+    if (!isValidToken) {
+      return res.status(403).json({ message: 'Invalid refresh token' });
+    }
 
     // Generate a new access token
     const newAccessToken = generateJWT(sub = userRecord.id, username = userRecord.username);
@@ -111,6 +132,15 @@ async function refreshAccessToken(req, res) {
     });
   } catch (error) {
     console.error('Error refreshing access token:', error);
+    
+    if (error.message === 'Refresh token expired') {
+      return res.status(401).json({ message: 'Refresh token expired, please log in again' });
+    }
+    
+    if (error.message === 'Invalid refresh token' || error.message === 'Invalid token type') {
+      return res.status(403).json({ message: 'Invalid refresh token' });
+    }
+    
     return res.status(500).json({ message: 'Internal server error' });
   }
 }

@@ -36,7 +36,9 @@ const storage = new Sequelize(
     await storage.authenticate();
   } catch (error) {
     console.error("Unable to connect to the database:", error);
-    process.exit(1);
+    if (process.env.NODE_ENV !== 'test') {
+      process.exit(1);
+    }
   }
 })();
 
