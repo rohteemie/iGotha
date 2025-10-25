@@ -5,7 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "NODE_ENV=test jest",
-    "migrate": "sequelize db:migrate"
+    "test:watch": "NODE_ENV=test jest --watch",
+    "test:coverage": "NODE_ENV=test jest --coverage",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "migrate": "sequelize db:migrate",
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
@@ -38,6 +43,8 @@
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
+    "eslint": "^9.38.0",
+    "globals": "^16.4.0",
     "jest": "^29.7.0"
   }
 }

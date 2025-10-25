@@ -205,6 +205,46 @@ This backend is built using node.js. It provides a user interface for user regis
 
 ---
 
+### Backend Testing and Code Quality
+
+The backend now includes comprehensive test coverage and code linting:
+
+#### Running Tests
+
+```bash
+cd backend
+
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+**Test Coverage**: 112 passing tests covering all models and services ✅
+
+#### Code Linting
+
+```bash
+# Check code style
+npm run lint
+
+# Auto-fix linting issues
+npm run lint:fix
+```
+
+#### Documentation
+
+For detailed backend documentation, API endpoints, and development guidelines, see:
+- [Backend README](backend/README.md) - Comprehensive setup and usage guide
+- [Backend Issues](backend/backend_issue.md) - Unimplemented features and roadmap
+- [API Documentation](http://localhost:3000/api-docs) - Swagger UI (when server is running)
+
+---
+
 ### Backend Structure
 
 The backend routes are organized as follows:
