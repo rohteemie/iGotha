@@ -16,6 +16,9 @@ module.exports = [
       'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       'prefer-const': 'warn',
       'no-var': 'error',
+      'indent': ['warn', 2],
+      'quotes': ['warn', 'single', { avoidEscape: true }],
+      'semi': ['warn', 'always'],
     },
   },
   {
